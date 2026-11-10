@@ -1,0 +1,33 @@
+name: OE-MIAPK-002 · H4 · Emisor de eventos (indicador en vivo)
+
+on:
+  push:
+    branches: [main]
+    paths: ["pruebas/fase1/h4_ejecutar.txt"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enviar evento ficticio H4 (USD 0)
+        env:
+          MIAPK_CRED_LAB: ${{ secrets.MIAPK_CRED_LAB }}
+        run: cd pruebas/fase1 && python3 h4_enviar.py
+      - name: Guardar registro en la rama resultados
+        if: always()
+        run: |
+          mkdir /tmp/res /tmp/res_new && cp pruebas/fase1/h4_registro.jsonl /tmp/res_new/h4_registro_${{ github.run_number }}.jsonl
+          cd /tmp/res
+          git init -q -b resultados
+          git config user.name "MIAPK pruebas"
+          git config user.email "actions@github.com"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          if git fetch -q origin resultados; then git checkout -q origin/resultados -- . 2>/dev/null; git reset -q --soft origin/resultados; fi
+          cp /tmp/res_new/* . 2>/dev/null || true
+          git add . && git commit -q -m "H4 · envío ${{ github.run_number }}"
+          git push -q origin resultados
