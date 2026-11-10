@@ -40,12 +40,13 @@ jobs:
       - name: Guardar registro en la rama resultados
         if: always()
         run: |
-          mkdir /tmp/res && cp pruebas/registro_prueba.jsonl /tmp/res/registro_${{ github.run_number }}.jsonl
+          mkdir /tmp/res /tmp/res_new && cp pruebas/registro_prueba.jsonl /tmp/res_new/registro_${{ github.run_number }}.jsonl
           cd /tmp/res
           git init -q -b resultados
           git config user.name "MIAPK pruebas"
           git config user.email "actions@github.com"
           git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
-          git fetch -q origin resultados && git reset -q --soft origin/resultados || true
+          if git fetch -q origin resultados; then git checkout -q origin/resultados -- . 2>/dev/null; git reset -q --soft origin/resultados; fi
+          cp /tmp/res_new/* . 2>/dev/null || true
           git add . && git commit -q -m "Prueba Sandbox LITE · ejecución ${{ github.run_number }}"
           git push -q origin resultados
