@@ -38,7 +38,7 @@ def log(evento, **datos):
 
 def post(path, body, headers):
     req = urllib.request.Request(API + path, data=json.dumps(body).encode(), method="POST",
-                                 headers={"content-type": "application/json", "accept": "application/json", **headers})
+                                 headers={"content-type": "application/json", "accept": "application/json", "user-agent": "MIAPK-prueba/0.1 (+https://github.com/cristhiansmail-byte/miapk)", **headers})
     t = time.monotonic()
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
@@ -79,7 +79,7 @@ async def main():
         print("TOKEN :", s.get("livekit_client_token"))
         print(f"(tienes {ESPERA_ESPECTADOR} s; el token de visor es temporal y no se debe compartir)\n")
 
-    async with websockets.connect(ws_url, max_size=None) as ws:
+    async with websockets.connect(ws_url, max_size=None, user_agent_header="MIAPK-prueba/0.1") as ws:
         # 3. Esperar estado 'connected' antes de cualquier comando
         while True:
             msg = json.loads(await ws.recv())
