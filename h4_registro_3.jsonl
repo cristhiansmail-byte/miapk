@@ -1,0 +1,1 @@
+{"accion": "error", "external_id": "lab-H4-2", "enviado_utc": "2026-11-10T19:31:00.087+00:00", "respondido_utc": "2026-11-10T19:31:00.220+00:00", "http": 200, "respuesta": {"estado": "rechazado", "motivo": "subject_entity o subject_id ausente"}}
