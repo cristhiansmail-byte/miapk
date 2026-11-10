@@ -1,0 +1,48 @@
+name: OE-MIA-001 · Prueba Sandbox LITE
+
+on:
+  push:
+    branches: [main]
+    paths: ["pruebas/ejecutar.txt"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prueba:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Dependencias
+        run: pip install websockets
+
+      - name: Ejecutar prueba (Sandbox, USD 0)
+        env:
+          LIVEAVATAR_API_KEY: ${{ secrets.LIVEAVATAR_API_KEY }}
+        run: |
+          cd pruebas
+          rm -f registro_prueba.jsonl
+          if [ -z "$LIVEAVATAR_API_KEY" ]; then
+            echo '{"t_ms":0,"evento":"error","detalle":"Falta el secreto LIVEAVATAR_API_KEY en el repositorio"}' > registro_prueba.jsonl
+            exit 0
+          fi
+          python prueba_sandbox_lite.py || true
+
+      - name: Guardar registro en la rama resultados
+        if: always()
+        run: |
+          mkdir /tmp/res && cp pruebas/registro_prueba.jsonl /tmp/res/registro_${{ github.run_number }}.jsonl
+          cd /tmp/res
+          git init -q -b resultados
+          git config user.name "MIAPK pruebas"
+          git config user.email "actions@github.com"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          git fetch -q origin resultados && git reset -q --soft origin/resultados || true
+          git add . && git commit -q -m "Prueba Sandbox LITE · ejecución ${{ github.run_number }}"
+          git push -q origin resultados
