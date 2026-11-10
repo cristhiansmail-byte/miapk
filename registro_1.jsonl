@@ -1,0 +1,3 @@
+{"t_ms": 9, "evento": "audio_cargado", "bytes": 752430, "segundos": 15.68}
+{"t_ms": 176, "evento": "http", "ruta": "/sessions/token", "estado": 401, "ms": 167, "respuesta": "{\"code\":4001,\"data\":null,\"message\":\"Invalid API key\"}"}
+{"t_ms": 177, "evento": "error", "tipo": "HTTPError", "detalle": "HTTP Error 401: Unauthorized"}
