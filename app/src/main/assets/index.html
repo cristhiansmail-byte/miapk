@@ -23,6 +23,11 @@ header{background:var(--tinta);color:#fff;padding:18px 18px 14px;position:sticky
 .brand b{font-size:20px;letter-spacing:.5px}
 .brand small{display:block;font-size:12px;color:#B9C6D0;font-weight:500}
 header h1{font-size:15px;font-weight:600;margin-top:10px;color:#DDF3F2}
+.upd{position:absolute;right:14px;top:18px;background:rgba(22,166,162,.18);color:#DDF3F2;border:1px solid #16A6A2;border-radius:999px;font:inherit;font-size:12px;font-weight:700;padding:7px 12px}
+.upd svg{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
+.btn{display:block;width:100%;text-align:center;background:var(--turq-osc);color:#fff;text-decoration:none;font-weight:700;font-size:15px;padding:14px;border-radius:12px;margin:6px 0}
+@media (prefers-color-scheme: dark){ .btn{background:var(--turq);color:#0F2133} }
+.legend .row .t{font-size:13px}
 main{padding:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
 .card h2{font-size:15px;margin-bottom:6px}
@@ -55,6 +60,7 @@ nav button.on{color:var(--turq-osc)}
     <div><b>MIAPK</b><small>Mi Sitio Web · Dirección</small></div>
   </div>
   <h1 id="titulo">Pulso</h1>
+  <button class="upd" onclick="verActualizar()"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Actualizar</button>
 </header>
 <main id="vista"></main>
 <nav id="nav"></nav>
@@ -62,6 +68,17 @@ nav button.on{color:var(--turq-osc)}
 <script>
 const D = {
  actualizado: "10 nov 2026",
+ urlActualizar: "https://github.com/cristhiansmail-byte/miapk/releases/latest",
+ novedades: [
+  ["0.2.0","Sección Actualizar · estado de los activos gráficos aprobados · leyenda de estados del dato · avance de OE-MIA-001 y OE-MIAPK-001 al día"],
+  ["0.1.0","Primera versión instalable: Pulso, Programas, Órdenes, Medición, MÍA y OSI"]
+ ],
+ activos: [
+  ["Logotipo Ruta A","Aprobado · vector maestro no existe todavía · la app usa un icono provisional"],
+  ["Rostro de MÍA","Aprobado · imágenes no transferidas a MIAPK · no se muestra sustituto"],
+  ["Insignia OSI","Aprobada · archivo no transferido · no se muestra sustituto"],
+  ["Tipografía Manrope","Aprobada · archivos y licencia por confirmar · la app usa la fuente del sistema"]
+ ],
  fuentes: [
   ["JetPost","Activa · colaboración Magda ↔ Magid","ok"],
   ["MÍA Web","Pendiente de integración (aún no existe)","pend"],
@@ -71,8 +88,7 @@ const D = {
   ["Repositorio OSI","Pendiente: documentos sin custodia formal","pend"]
  ],
  decisiones: [
-  ["Correr la prueba gratuita de la voz de MÍA","OE-MIA-001 · en pausa hasta instalar MIAPK","warn"],
-  ["Recarga mínima de la API de HeyGen (≈ USD 5)","OE-MIA-001 · sin autorizar","pend"],
+  ["Gasto para el rostro de MÍA en el avatar","OE-MIA-001 · decidido: sin gastos por ahora","ok"],
   ["Proveedor de nube y servidor de MIAPK","Se decide con el costeo E10","pend"],
   ["Moneda de reporte y metas de indicadores","Se decide cuando haya datos confirmados","pend"]
  ],
@@ -88,11 +104,11 @@ const D = {
  ],
  proyectos: ["P01 Identidad visual","P02 Manual Maestro de Identidad","P03 Biblia de MÍA","P04 Experiencia web conversacional","P05 Generación y vista previa","P06 Oferta y contratación","P07 Entrega y publicación","P08 Producción publicitaria MÍA","P09 Panel interno mínimo","P10 Habilitación internacional"],
  ordenes: [
-  {id:"OE-MIAPK-001",t:"MIAPK · Fase 0 + APK v0.1",e:"En ejecución",c:"ok",
-   d:["E01 Inventario de fuentes — entregado, aceptado por Magid","E02 Arquitectura — entregado, aceptado con salvedades","E03 Entidades y eventos — entregado","E04 Diccionario de indicadores — entregado","APK v0.1 instalable — en curso por instrucción de Dirección (10 nov)","E05 a E10 — pendientes"],
+  {id:"OE-MIAPK-001",t:"MIAPK · Fase 0 + APK",e:"En ejecución",c:"ok",
+   d:["E01 Inventario de fuentes — entregado, aceptado por Magid","E02 Arquitectura — entregado, aceptado con salvedades","E03 Entidades y eventos — entregado","E04 Diccionario de indicadores — entregado","APK v0.1 instalada en el Android de Dirección (10 nov)","E05 Matriz de autoridades y seguridad — entregado, aceptado","E06 Diseño visual navegable — esta versión 0.2.0","E07 a E10 — pendientes"],
    p:"USD 0", o:"CSW 002 v1.1 aprobado"},
-  {id:"OE-MIA-001",t:"Licencia e integración de la voz de MÍA",e:"En pausa",c:"warn",
-   d:["Fase 1 documental — entregada","Kit de prueba Sandbox LITE — entregado a Dirección","Prueba en vivo — pausada hasta tener MIAPK instalada"],
+  {id:"OE-MIA-001",t:"Licencia e integración de la voz de MÍA",e:"Hito logrado",c:"ok",
+   d:["Fase 1 documental — entregada","Prueba Sandbox LITE — PASA: voz Montserrat con labios sincronizados, verificado por Dirección (10 nov)","Rostro de MÍA en el avatar y voz nueva por API — de pago; Dirección decidió sin gastos por ahora"],
    p:"USD 0", o:"CSW 001 aprobado"}
  ],
  csw: [["CSW 001","Licencia comercial e integración de voz MÍA","Aprobado"],["CSW 002 v1.1","MIAPK · Sistema de Dirección, Gestión y Medición","Aprobado (Fase 0)"]],
@@ -128,14 +144,14 @@ const D = {
 };
 const pill=(txt,c)=>`<span class="badge b-${c}">${txt}</span>`;
 const row=(t,d,b,attr="")=>`<div class="row ${attr?'tap':''}" ${attr}><div><div class="t">${t}</div><div class="d">${d}</div></div>${b||""}</div>`;
-const pie=`<p class="note">MIAPK v0.1 · contenido de referencia actualizado al ${D.actualizado} · sin servidor todavía: nada se calcula en vivo.</p>`;
+const pie=`<p class="note">MIAPK v${ver()} · contenido de referencia actualizado al ${D.actualizado} · sin servidor todavía: nada se calcula en vivo.</p>`;
 
 const V = {
  Pulso(){ return `
   <div class="sec">Decisiones de Dirección</div>
-  <div class="card">${D.decisiones.map(x=>row(x[0],x[1],pill(x[2]=="warn"?"Prioridad":"Pendiente",x[2]))).join("")}</div>
+  <div class="card">${D.decisiones.map(x=>row(x[0],x[1],pill(x[2]=="ok"?"Decidido":x[2]=="warn"?"Prioridad":"Pendiente",x[2]))).join("")}</div>
   <div class="sec">Órdenes activas</div>
-  <div class="card">${D.ordenes.map((o,i)=>row(o.id,o.t,pill(o.e,o.c),`onclick="ver('orden',${i})"`)).join("")}</div>
+  <div class="card">${D.ordenes.map((o,i)=>row(o.id,o.t,pill(o.e,o.c),`onclick="verOrden('orden',${i})"`)).join("")}</div>
   <div class="sec">Fuentes de datos</div>
   <div class="card">${D.fuentes.map(f=>row(f[0],f[1],pill(f[2]=="ok"?"Activa":"Pendiente",f[2]))).join("")}</div>${pie}`;},
  Programas(){ return `
@@ -145,18 +161,27 @@ const V = {
   <div class="card"><ul>${D.proyectos.map(p=>`<li>${p}</li>`).join("")}</ul></div>${pie}`;},
  Órdenes(){ return `
   <div class="sec">Órdenes ejecutivas</div>
-  <div class="card">${D.ordenes.map((o,i)=>row(o.id,o.t,pill(o.e,o.c),`onclick="ver('orden',${i})"`)).join("")}</div>
+  <div class="card">${D.ordenes.map((o,i)=>row(o.id,o.t,pill(o.e,o.c),`onclick="verOrden('orden',${i})"`)).join("")}</div>
   <div class="sec">CSW</div>
   <div class="card">${D.csw.map(c=>row(c[0],c[1],pill(c[2],"ok"))).join("")}</div>${pie}`;},
  Medición(){ return `
   <div class="card"><p><b>Ningún indicador tiene datos todavía.</b> Sus fuentes aún no existen; por eso todos aparecen como <b>Pendiente</b> y no como cero.</p></div>
-  <div class="card">${D.indicadores.map(i=>row(i[0],i[1],pill("Pendiente","pend"))).join("")}</div>${pie}`;},
+  <div class="card">${D.indicadores.map(i=>row(i[0],i[1],pill("Pendiente","pend"))).join("")}</div>
+  <div class="sec">Qué significa cada estado</div>
+  <div class="card legend">
+   ${row("Confirmado","Hay datos y la fuente está al día; un cero aquí es un cero real",pill("Confirmado","ok"))}
+   ${row("Sin datos","La fuente existe pero no hubo eventos en el período",pill("Sin datos","pend"))}
+   ${row("Pendiente","La fuente todavía no está integrada",pill("Pendiente","pend"))}
+   ${row("Desactualizado","La fuente no reportó en su plazo",pill("Desactualizado","warn"))}
+   ${row("Error","Hay eventos con error que afectan el cálculo",pill("Error","err"))}
+  </div>${pie}`;},
  MÍA(){ return `
   <div class="card"><h2>MÍA</h2><p>Inteligencia artificial de Mi Sitio Web. Una identidad, dos funciones: <b>MÍA Web</b> (clientes) y <b>MÍA APK</b> (dirección).</p></div>
   <div class="card">
    ${row("Rostro","Aprobado · cinco vistas (Anexo Visual v1.0)",pill("Aprobado","ok"))}
    ${row("Voz","Montserrat · HeyGen",pill("Aprobada","ok"))}
-   ${row("Avatar animado y labios","Prueba Sandbox pendiente (OE-MIA-001)",pill("Pendiente","pend"))}
+   ${row("Voz y labios en avatar en vivo","Prueba gratuita superada con avatar de prueba (10 nov)",pill("Probado","ok"))}
+   ${row("Rostro de MÍA en el avatar","Requiere plan de pago · sin gastos por ahora",pill("Pendiente","pend"))}
    ${row("Asistente MÍA APK","Llega cuando MIAPK tenga servidor",pill("Pendiente","pend"))}
   </div>
   <div class="card"><h2>Bienvenida aprobada</h2><p class="quote">Hola, soy Mía, la asistente de Mi Sitio Web. Estoy aquí para ayudarte a crear un sitio que responda a lo que necesitas. Podemos conversar y construirlo juntos, paso a paso. Para comenzar, cuéntame: ¿qué es lo tuyo?</p></div>
@@ -164,7 +189,10 @@ const V = {
  OSI(){ return `
   <div class="card"><h2>Oficina de Salvaguarda Institucional</h2><p>Custodia de los documentos oficiales de Mi Sitio Web. <b>Hoy ningún documento está bajo custodia formal</b>: esta lista registra qué existe y dónde está.</p></div>
   <div class="card">${D.osi.map(d=>row(d[0],d[2],pill(d[1],"ok"))).join("")}</div>
-  <div class="card"><p>Ciclo: Borrador → En revisión → Aprobado → Vigente → Sustituido / Archivado. Solo Dirección aprueba.</p></div>${pie}`;}
+  <div class="card"><p>Ciclo: Borrador → En revisión → Aprobado → Vigente → Sustituido / Archivado. Solo Dirección aprueba.</p></div>
+  <div class="card"><p><b>Documentos restringidos:</b> no se muestran en MIAPK hasta que exista inicio de sesión con doble verificación (E05).</p></div>
+  <div class="sec">Activos gráficos aprobados</div>
+  <div class="card">${D.activos.map(a=>row(a[0],a[1],pill("No incorporado","pend"))).join("")}</div>${pie}`;}
 };
 const iconos={
  Pulso:'<path d="M3 12h4l3-7 4 14 3-7h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
@@ -174,6 +202,21 @@ const iconos={
  MÍA:'<path d="M4 5h16v11H10l-5 4v-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
  OSI:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
 };
+function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.2.0"; }catch(e){ return "0.2.0"; } }
+function verActualizar(){ detalle=true;
+  document.getElementById("titulo").textContent="Actualizar";
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));
+  document.getElementById("vista").innerHTML=`<a class="back" onclick="ir(actual)">← Volver</a>
+   <div class="card"><h2>Tienes MIAPK ${ver()}</h2><p>Cuando haya una versión nueva, Magda te la envía en el chat. También puedes buscarla aquí.</p></div>
+   <a class="btn" href="${D.urlActualizar}">Buscar actualizaciones</a>
+   <div class="card"><h2>Cómo actualizar</h2><ul>
+    <li>Toca <b>Buscar actualizaciones</b> (la primera vez GitHub te pide iniciar sesión con tu cuenta de Google).</li>
+    <li>Si la versión que aparece es mayor que la tuya, toca el archivo <b>MIAPK-….apk</b>.</li>
+    <li>Ábrelo y toca <b>Actualizar</b>. La versión nueva se instala encima, sin borrar nada.</li></ul></div>
+   <div class="sec">Novedades</div>
+   <div class="card">${D.novedades.map(n=>row("Versión "+n[0],n[1])).join("")}</div>${pie}`;
+  window.scrollTo(0,0);
+}
 let actual="Pulso", detalle=false;
 function ir(n){ actual=n; detalle=false;
   document.getElementById("titulo").textContent=n;
@@ -181,7 +224,7 @@ function ir(n){ actual=n; detalle=false;
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.v==n));
   window.scrollTo(0,0);
 }
-function ver(tipo,i){ const o=D.ordenes[i]; detalle=true;
+function verOrden(tipo,i){ const o=D.ordenes[i]; detalle=true;
   document.getElementById("titulo").textContent=o.id;
   document.getElementById("vista").innerHTML=`<a class="back" onclick="ir(actual)">← Volver</a>
    <div class="card"><h2>${o.t}</h2>${row("Estado",o.o,pill(o.e,o.c))}${row("Presupuesto autorizado",o.p)}</div>
