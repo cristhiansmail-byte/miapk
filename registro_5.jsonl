@@ -1,0 +1,31 @@
+{"t_ms": 10, "evento": "audio_cargado", "bytes": 752430, "segundos": 15.68}
+{"t_ms": 155, "evento": "http", "ruta": "/sessions/token", "estado": 200, "ms": 145}
+{"t_ms": 155, "evento": "token_creado", "session_id": "7a66e3bd-1340-469f-a7c7-806c13763b94"}
+{"t_ms": 552, "evento": "http", "ruta": "/sessions/start", "estado": 201, "ms": 396}
+{"t_ms": 552, "evento": "sesion_iniciada", "max_duracion_s": 60}
+{"t_ms": 552, "evento": "sala_livekit", "url_presente": true, "token_visor_presente": true}
+{"t_ms": 1774, "evento": "visor_publicado"}
+{"t_ms": 2010, "evento": "ws_recibido", "type": "session.state_updated", "event_id": "2f093d35-d46e-441c-ac2b-b3c2ed9b5015", "source_event_id": null, "state": "connected"}
+{"t_ms": 27015, "evento": "envio_inicio", "event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27071, "evento": "envio_fin", "trozos": 16}
+{"t_ms": 27072, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "3e904863-2675-4dac-aeb3-c1fe79f7e0dd", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27074, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "ff1e6029-6aa4-4c38-9e64-18254e62872d", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27075, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "630d6f19-fac4-4ac8-bbdc-cda6bfbf3655", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27088, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "840b3fa7-b160-4c38-9439-8f4bb10c38a1", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27088, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "a2386a86-f97d-4b2f-8609-fcdf6d215713", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27089, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "01ba9918-46ab-4f88-b854-0f3875380491", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27104, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "0365f204-3143-4d51-9fe1-a7418ab453f7", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27104, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "2e664bd1-53dd-4cdc-92ce-fa608ffce24c", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27105, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "467a51a4-bb78-4c37-acde-e85849917c87", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27105, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "fd5e0ea4-7220-4bdf-a7a4-fa324ca7b164", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27105, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "1cad4f52-59b6-44ed-8988-c2533da25b36", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27105, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "29cf156d-1dcc-44ba-882d-2279cb4ae2c5", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27105, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "0cca3e13-30ff-4aab-9930-a585df19fc0f", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27115, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "ffa7fc31-ac77-476b-8a41-e828ea771166", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27116, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "55c56564-81e7-4464-9c57-51e4104b09b2", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27116, "evento": "ws_recibido", "type": "agent.audio_buffer_appended", "event_id": "f9e9543a-e510-4fc6-979c-daf10aabd20c", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27116, "evento": "ws_recibido", "type": "agent.audio_buffer_committed", "event_id": "0f25dbac-ed52-4f55-9ca3-3b6c13565c34", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 27403, "evento": "ws_recibido", "type": "agent.state_updated", "event_id": "690571ca-f8f2-4cd4-b8b6-0b4246a609fb", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c", "previous_state": "idle", "new_state": "talking"}
+{"t_ms": 27403, "evento": "ws_recibido", "type": "agent.speak_started", "event_id": "97093179-4841-4d11-9f46-612138640797", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 43083, "evento": "ws_recibido", "type": "agent.speak_ended", "event_id": "e7b56cf9-d14d-4d82-9e6d-7c0105fa0a3c", "source_event_id": "ec42365a-4273-4ec0-99aa-0c4097e3869c"}
+{"t_ms": 43098, "evento": "prueba_terminada"}
