@@ -28,6 +28,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if grep -q observada pruebas/ejecutar.txt; then export MODO_VISOR=1; fi
+          if grep -q ritmo pruebas/ejecutar.txt; then export RITMO_REAL=1; fi
           cd pruebas
           rm -f registro_prueba.jsonl
           if [ -z "$LIVEAVATAR_API_KEY" ]; then

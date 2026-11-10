@@ -107,9 +107,13 @@ async def main():
         # 4. Enviar el audio en trozos de ~1 s y cerrar el turno
         evento = str(uuid.uuid4())
         log("envio_inicio", event_id=evento)
-        for i in range(0, len(pcm), CHUNK):
+        ritmo_real = os.environ.get("RITMO_REAL") == "1"
+        log("modo_envio", ritmo_real=ritmo_real)
+        for n, i in enumerate(range(0, len(pcm), CHUNK)):
             await ws.send(json.dumps({"type": "agent.speak", "event_id": evento,
                                       "audio": base64.b64encode(pcm[i:i + CHUNK]).decode()}))
+            if ritmo_real and n >= 1:   # 2 s de adelanto, luego 1 trozo de 1 s por segundo
+                await asyncio.sleep(1.0)
         await ws.send(json.dumps({"type": "agent.speak_end", "event_id": evento}))
         log("envio_fin", trozos=-(-len(pcm) // CHUNK))
 
