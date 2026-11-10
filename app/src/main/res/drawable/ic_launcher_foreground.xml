@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icono provisional v0.1: globo de conversación con ventana (concepto Ruta A). Se reemplaza por el vector maestro aprobado cuando exista. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#16A6A2"
+        android:pathData="M30,32 h48 a6,6 0 0 1 6,6 v26 a6,6 0 0 1 -6,6 h-30 l-10,9 v-9 h-8 a6,6 0 0 1 -6,-6 v-26 a6,6 0 0 1 6,-6 z" />
+    <path android:fillColor="#19324A" android:pathData="M30,32 h48 a6,6 0 0 1 6,6 v4 h-60 v-4 a6,6 0 0 1 6,-6 z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M31,37 m-1.6,0 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0" />
+    <path android:fillColor="#FFFFFF" android:pathData="M37,37 m-1.6,0 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0" />
+    <path android:fillColor="#FFFFFF" android:pathData="M43,37 m-1.6,0 a1.6,1.6 0 1 0 3.2,0 a1.6,1.6 0 1 0 -3.2,0" />
+    <path android:fillColor="#FFFFFF" android:pathData="M33,64 l12,-12 l8,8 l6,-6 l13,10 z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M66,51 m-3.5,0 a3.5,3.5 0 1 0 7,0 a3.5,3.5 0 1 0 -7,0" />
+</vector>

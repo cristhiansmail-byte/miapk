@@ -1,0 +1,41 @@
+name: Compilar MIAPK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14.3"
+
+      - name: Compilar APK firmada
+        run: gradle :app:assembleRelease --no-daemon
+
+      - name: Nombrar APK
+        run: |
+          VERSION=$(grep versionName app/build.gradle.kts | sed -E 's/.*"(.*)".*/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          cp app/build/outputs/apk/release/app-release.apk MIAPK-$VERSION.apk
+
+      - name: Publicar en Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}-b${{ github.run_number }}
+          name: MIAPK ${{ env.VERSION }} (compilación ${{ github.run_number }})
+          files: MIAPK-${{ env.VERSION }}.apk
+          make_latest: true

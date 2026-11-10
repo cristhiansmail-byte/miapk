@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="azul_tinta">#19324A</color>
+    <color name="turquesa">#16A6A2</color>
+    <style name="Theme.MIAPK" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/azul_tinta</item>
+        <item name="android:navigationBarColor">@color/azul_tinta</item>
+        <item name="android:windowBackground">@color/azul_tinta</item>
+    </style>
+</resources>

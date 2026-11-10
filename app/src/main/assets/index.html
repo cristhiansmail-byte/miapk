@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MIAPK</title>
+<style>
+:root{
+  --tinta:#19324A; --turq:#16A6A2; --turq-osc:#0B716D; --pizarra:#526270;
+  --bg:#F8FAFB; --card:#FFFFFF; --txt:#19324A; --sub:#526270; --line:#E3E8EC;
+  --ok:#0B716D; --warn:#9A6700; --pend:#526270; --err:#B42318;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0F2133; --card:#19324A; --txt:#F8FAFB; --sub:#B9C6D0; --line:#2A4560;
+         --ok:#16A6A2; --pend:#B9C6D0; --warn:#E3B341; --err:#F97066; }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Manrope,Inter,"Segoe UI",Roboto,system-ui,sans-serif;background:var(--bg);color:var(--txt);
+  -webkit-tap-highlight-color:transparent;padding-bottom:76px}
+header{background:var(--tinta);color:#fff;padding:18px 18px 14px;position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:10px}
+.brand svg{width:34px;height:34px;flex:none}
+.brand b{font-size:20px;letter-spacing:.5px}
+.brand small{display:block;font-size:12px;color:#B9C6D0;font-weight:500}
+header h1{font-size:15px;font-weight:600;margin-top:10px;color:#DDF3F2}
+main{padding:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{font-size:15px;margin-bottom:6px}
+.card p,.card li{font-size:14px;line-height:1.45;color:var(--sub)}
+.card ul{padding-left:18px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row .t{font-size:14px;font-weight:600}
+.row .d{font-size:12.5px;color:var(--sub);margin-top:2px}
+.tap{cursor:pointer}
+.badge{font-size:11px;font-weight:700;padding:4px 8px;border-radius:999px;white-space:nowrap;border:1px solid currentColor}
+.b-ok{color:var(--ok)} .b-pend{color:var(--pend)} .b-warn{color:var(--warn)} .b-err{color:var(--err)}
+.sec{font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--sub);margin:16px 2px 8px;text-transform:uppercase}
+.note{font-size:12px;color:var(--sub);text-align:center;margin:18px 6px}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:0;color:var(--sub);font:inherit;font-size:11px;font-weight:600;padding:6px 0;border-radius:10px}
+nav button svg{display:block;margin:0 auto 3px;width:22px;height:22px}
+nav button.on{color:var(--turq-osc)}
+@media (prefers-color-scheme: dark){ nav button.on{color:var(--turq)} }
+.back{display:inline-block;margin-bottom:10px;color:var(--turq-osc);font-weight:700;font-size:14px}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px;word-break:break-all}
+.quote{border-left:3px solid var(--turq);padding-left:10px;font-style:italic}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 108 108" aria-hidden="true"><path fill="#16A6A2" d="M30,32h48a6,6 0 0 1 6,6v26a6,6 0 0 1-6,6h-30l-10,9v-9h-8a6,6 0 0 1-6-6v-26a6,6 0 0 1 6-6z"/><path fill="#fff" d="M33,64l12-12l8,8l6-6l13,10z"/></svg>
+    <div><b>MIAPK</b><small>Mi Sitio Web · Dirección</small></div>
+  </div>
+  <h1 id="titulo">Pulso</h1>
+</header>
+<main id="vista"></main>
+<nav id="nav"></nav>
+
+<script>
+const D = {
+ actualizado: "10 nov 2026",
+ fuentes: [
+  ["JetPost","Activa · colaboración Magda ↔ Magid","ok"],
+  ["MÍA Web","Pendiente de integración (aún no existe)","pend"],
+  ["Pagos","Pendiente de integración (sin pasarela)","pend"],
+  ["Producción y entregas","Pendiente de integración","pend"],
+  ["Soporte","Pendiente de integración","pend"],
+  ["Repositorio OSI","Pendiente: documentos sin custodia formal","pend"]
+ ],
+ decisiones: [
+  ["Correr la prueba gratuita de la voz de MÍA","OE-MIA-001 · en pausa hasta instalar MIAPK","warn"],
+  ["Recarga mínima de la API de HeyGen (≈ USD 5)","OE-MIA-001 · sin autorizar","pend"],
+  ["Proveedor de nube y servidor de MIAPK","Se decide con el costeo E10","pend"],
+  ["Moneda de reporte y metas de indicadores","Se decide cuando haya datos confirmados","pend"]
+ ],
+ programas: [
+  ["1","Identidad corporativa","Manual v1.0 aprobado · vectores del logo pendientes"],
+  ["2","MÍA y comunicación","Rostro y voz Montserrat aprobados · avatar animado pendiente"],
+  ["3","Experiencia de creación","Diseño conversacional definido · prototipo pendiente"],
+  ["4","Producción y entrega","Sin entregas todavía"],
+  ["5","Comercial y publicidad","Concepto «¿Qué es lo tuyo?» aprobado · piloto pendiente"],
+  ["6","Protección y confiabilidad","OSI diseñada (E02–E03) · custodia pendiente"],
+  ["7","Medición y mejora","16 indicadores definidos (E04) · todos pendientes"],
+  ["8","Internacionalización","Vocación internacional aprobada · mercados sin habilitar"]
+ ],
+ proyectos: ["P01 Identidad visual","P02 Manual Maestro de Identidad","P03 Biblia de MÍA","P04 Experiencia web conversacional","P05 Generación y vista previa","P06 Oferta y contratación","P07 Entrega y publicación","P08 Producción publicitaria MÍA","P09 Panel interno mínimo","P10 Habilitación internacional"],
+ ordenes: [
+  {id:"OE-MIAPK-001",t:"MIAPK · Fase 0 + APK v0.1",e:"En ejecución",c:"ok",
+   d:["E01 Inventario de fuentes — entregado, aceptado por Magid","E02 Arquitectura — entregado, aceptado con salvedades","E03 Entidades y eventos — entregado","E04 Diccionario de indicadores — entregado","APK v0.1 instalable — en curso por instrucción de Dirección (10 nov)","E05 a E10 — pendientes"],
+   p:"USD 0", o:"CSW 002 v1.1 aprobado"},
+  {id:"OE-MIA-001",t:"Licencia e integración de la voz de MÍA",e:"En pausa",c:"warn",
+   d:["Fase 1 documental — entregada","Kit de prueba Sandbox LITE — entregado a Dirección","Prueba en vivo — pausada hasta tener MIAPK instalada"],
+   p:"USD 0", o:"CSW 001 aprobado"}
+ ],
+ csw: [["CSW 001","Licencia comercial e integración de voz MÍA","Aprobado"],["CSW 002 v1.1","MIAPK · Sistema de Dirección, Gestión y Medición","Aprobado (Fase 0)"]],
+ indicadores: [
+  ["PFV aceptados","Indicador principal · entregas aceptadas por el cliente"],
+  ["Conversaciones calificadas","Necesidad confirmada por MÍA"],
+  ["Tasa de comprensión confirmada","Necesidad confirmada ÷ conversaciones iniciadas"],
+  ["Vista previa a tiempo","Mediana de minutos hasta la primera vista previa"],
+  ["Correcciones atendidas","Atendidas ÷ solicitadas"],
+  ["Conversión informada","Propuestas aceptadas ÷ emitidas"],
+  ["Tiempo a propuesta","Mediana de días hasta la propuesta"],
+  ["Tasa de aceptación de entregas","PFV aceptados ÷ entregas cerradas"],
+  ["Defectos de publicación","Casos en 14 días ÷ entregas"],
+  ["Cumplimiento de órdenes","Aceptadas ÷ emitidas con vencimiento"],
+  ["Ingresos verificados","Solo pagos confirmados por el proveedor"],
+  ["Costo de IA por PFV","Consumo de IA ÷ PFV aceptados"],
+  ["Margen por entrega","(Ingreso − costos directos) ÷ ingreso"],
+  ["Satisfacción del cliente","Promedio 1–5 con tasa de respuesta"],
+  ["Retención","Clientes que vuelven en 12 meses"],
+  ["Salud documental OSI","Vigentes · en revisión · por vencer · integridad · restauración"]
+ ],
+ osi: [
+  ["Escala Administrativa v1.0","Aprobado","Archivo en entorno de Magid · sin custodia"],
+  ["Manual Maestro de Identidad v1.0","Aprobado","Texto en JetPost · PDF en entorno de Magid"],
+  ["Anexo Visual MÍA v1.0","Aprobado","Imágenes no transferidas"],
+  ["Anexo de Voz MÍA v1.0 · Montserrat","Aprobado","Audios en poder de Dirección y Magda"],
+  ["CSW 001","Aprobado","Texto en JetPost"],
+  ["CSW 002 v1.1","Aprobado","Texto en JetPost"],
+  ["OE-MIA-001","Emitida","Texto en JetPost"],
+  ["OE-MIAPK-001","Emitida","Texto en JetPost"],
+  ["Insignia OSI","Aprobado","Archivo de imagen pendiente de transferencia"]
+ ]
+};
+const pill=(txt,c)=>`<span class="badge b-${c}">${txt}</span>`;
+const row=(t,d,b,attr="")=>`<div class="row ${attr?'tap':''}" ${attr}><div><div class="t">${t}</div><div class="d">${d}</div></div>${b||""}</div>`;
+const pie=`<p class="note">MIAPK v0.1 · contenido de referencia actualizado al ${D.actualizado} · sin servidor todavía: nada se calcula en vivo.</p>`;
+
+const V = {
+ Pulso(){ return `
+  <div class="sec">Decisiones de Dirección</div>
+  <div class="card">${D.decisiones.map(x=>row(x[0],x[1],pill(x[2]=="warn"?"Prioridad":"Pendiente",x[2]))).join("")}</div>
+  <div class="sec">Órdenes activas</div>
+  <div class="card">${D.ordenes.map((o,i)=>row(o.id,o.t,pill(o.e,o.c),`onclick="ver('orden',${i})"`)).join("")}</div>
+  <div class="sec">Fuentes de datos</div>
+  <div class="card">${D.fuentes.map(f=>row(f[0],f[1],pill(f[2]=="ok"?"Activa":"Pendiente",f[2]))).join("")}</div>${pie}`;},
+ Programas(){ return `
+  <div class="sec">Ocho programas</div>
+  <div class="card">${D.programas.map(p=>row(p[0]+". "+p[1],p[2])).join("")}</div>
+  <div class="sec">Proyectos aprobados</div>
+  <div class="card"><ul>${D.proyectos.map(p=>`<li>${p}</li>`).join("")}</ul></div>${pie}`;},
+ Órdenes(){ return `
+  <div class="sec">Órdenes ejecutivas</div>
+  <div class="card">${D.ordenes.map((o,i)=>row(o.id,o.t,pill(o.e,o.c),`onclick="ver('orden',${i})"`)).join("")}</div>
+  <div class="sec">CSW</div>
+  <div class="card">${D.csw.map(c=>row(c[0],c[1],pill(c[2],"ok"))).join("")}</div>${pie}`;},
+ Medición(){ return `
+  <div class="card"><p><b>Ningún indicador tiene datos todavía.</b> Sus fuentes aún no existen; por eso todos aparecen como <b>Pendiente</b> y no como cero.</p></div>
+  <div class="card">${D.indicadores.map(i=>row(i[0],i[1],pill("Pendiente","pend"))).join("")}</div>${pie}`;},
+ MÍA(){ return `
+  <div class="card"><h2>MÍA</h2><p>Inteligencia artificial de Mi Sitio Web. Una identidad, dos funciones: <b>MÍA Web</b> (clientes) y <b>MÍA APK</b> (dirección).</p></div>
+  <div class="card">
+   ${row("Rostro","Aprobado · cinco vistas (Anexo Visual v1.0)",pill("Aprobado","ok"))}
+   ${row("Voz","Montserrat · HeyGen",pill("Aprobada","ok"))}
+   ${row("Avatar animado y labios","Prueba Sandbox pendiente (OE-MIA-001)",pill("Pendiente","pend"))}
+   ${row("Asistente MÍA APK","Llega cuando MIAPK tenga servidor",pill("Pendiente","pend"))}
+  </div>
+  <div class="card"><h2>Bienvenida aprobada</h2><p class="quote">Hola, soy Mía, la asistente de Mi Sitio Web. Estoy aquí para ayudarte a crear un sitio que responda a lo que necesitas. Podemos conversar y construirlo juntos, paso a paso. Para comenzar, cuéntame: ¿qué es lo tuyo?</p></div>
+  <div class="card"><p class="mono">ID de voz: 1777080b7f574979875dc144b9fbf0de</p></div>${pie}`;},
+ OSI(){ return `
+  <div class="card"><h2>Oficina de Salvaguarda Institucional</h2><p>Custodia de los documentos oficiales de Mi Sitio Web. <b>Hoy ningún documento está bajo custodia formal</b>: esta lista registra qué existe y dónde está.</p></div>
+  <div class="card">${D.osi.map(d=>row(d[0],d[2],pill(d[1],"ok"))).join("")}</div>
+  <div class="card"><p>Ciclo: Borrador → En revisión → Aprobado → Vigente → Sustituido / Archivado. Solo Dirección aprueba.</p></div>${pie}`;}
+};
+const iconos={
+ Pulso:'<path d="M3 12h4l3-7 4 14 3-7h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ Programas:'<rect x="3" y="3" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>',
+ Órdenes:'<path d="M7 3h10v18H7z M10 8h4 M10 12h4 M10 16h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ Medición:'<path d="M4 20V10 M10 20V4 M16 20v-7 M22 20H2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ MÍA:'<path d="M4 5h16v11H10l-5 4v-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+ OSI:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
+};
+let actual="Pulso", detalle=false;
+function ir(n){ actual=n; detalle=false;
+  document.getElementById("titulo").textContent=n;
+  document.getElementById("vista").innerHTML=V[n]();
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.v==n));
+  window.scrollTo(0,0);
+}
+function ver(tipo,i){ const o=D.ordenes[i]; detalle=true;
+  document.getElementById("titulo").textContent=o.id;
+  document.getElementById("vista").innerHTML=`<a class="back" onclick="ir(actual)">← Volver</a>
+   <div class="card"><h2>${o.t}</h2>${row("Estado",o.o,pill(o.e,o.c))}${row("Presupuesto autorizado",o.p)}</div>
+   <div class="sec">Avance</div><div class="card"><ul>${o.d.map(x=>`<li>${x}</li>`).join("")}</ul></div>${pie}`;
+  window.scrollTo(0,0);
+}
+window.miapkBack=()=>{ if(detalle){ir(actual);return true;} if(actual!="Pulso"){ir("Pulso");return true;} return false; };
+document.getElementById("nav").innerHTML=Object.keys(V).map(n=>`<button data-v="${n}" onclick="ir('${n}')"><svg viewBox="0 0 24 24">${iconos[n]}</svg>${n}</button>`).join("");
+ir("Pulso");
+</script>
+</body>
+</html>
