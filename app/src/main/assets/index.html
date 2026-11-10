@@ -74,6 +74,7 @@ const D = {
  actualizado: "10 nov 2026",
  urlActualizar: "https://github.com/cristhiansmail-byte/miapk/releases/latest",
  novedades: [
+  ["0.3.1","Motor de eventos del laboratorio (H3): contador de eventos corregido · eventos con error · estado de cada fuente · pestañas de referencia rotuladas «Referencia · sin conexión»"],
   ["0.3.0","Acceso seguro al servidor de laboratorio con contraseña y doble verificación (código de Google Authenticator) · cierre de sesión por inactividad y en todos los dispositivos"],
   ["0.2.0","Sección Actualizar · estado de los activos gráficos aprobados · leyenda de estados del dato · avance de OE-MIA-001 y OE-MIAPK-001 al día"],
   ["0.1.0","Primera versión instalable: Pulso, Programas, Órdenes, Medición, MÍA y OSI"]
@@ -209,7 +210,7 @@ const iconos={
  MÍA:'<path d="M4 5h16v11H10l-5 4v-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
  OSI:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
 };
-function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.3.0"; }catch(e){ return "0.3.0"; } }
+function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.3.1"; }catch(e){ return "0.3.1"; } }
 function verActualizar(){ detalle=true;
   document.getElementById("titulo").textContent="Actualizar";
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));
@@ -252,8 +253,9 @@ const Auth = {
   async factores(){ const u=await this.api("/auth/v1/user"); return (u.factors||[]).filter(f=>f.factor_type=="totp"); },
   async enrolar(){ return this.api("/auth/v1/factors",{method:"POST",body:{factor_type:"totp",friendly_name:"MIAPK "+new Date().toISOString().slice(0,10)}}); },
   async verificar(factorId, codigo){ const c=await this.api("/auth/v1/factors/"+factorId+"/challenge",{method:"POST",body:{}}); this.fijar(await this.api("/auth/v1/factors/"+factorId+"/verify",{method:"POST",body:{challenge_id:c.id,code:codigo}})); },
+  async leer(ruta){ const r=await fetch(SB.url+"/rest/v1/"+ruta,{headers:{apikey:SB.key,Authorization:"Bearer "+this.s.access_token,"Accept-Profile":"miapk"}}); if(!r.ok) throw new Error("rechazado ("+r.status+")"); return r.json(); },
   async salirTodos(){ try{ await this.api("/auth/v1/logout?scope=global",{method:"POST"}); }catch(e){} this.borrar(); },
-  async contar(tabla){ const r=await fetch(SB.url+"/rest/v1/"+tabla+"?select=id",{headers:{apikey:SB.key,Authorization:"Bearer "+this.s.access_token,"Accept-Profile":"miapk",Prefer:"count=exact",Range:"0-0"}});
+  async contar(tabla,col){ const r=await fetch(SB.url+"/rest/v1/"+tabla+"?select="+(col||"id"),{headers:{apikey:SB.key,Authorization:"Bearer "+this.s.access_token,"Accept-Profile":"miapk",Prefer:"count=exact",Range:"0-0"}});
     if(!r.ok){ return "rechazado ("+r.status+")"; } const cr=r.headers.get("content-range")||"*/0"; return cr.split("/")[1]; }
 };
 function traducir(m){ const t={"Invalid login credentials":"Correo o contraseña incorrectos.","Email not confirmed":"Falta confirmar tu correo: abre el mensaje de Supabase y toca el enlace.","User already registered":"Ese correo ya tiene acceso. Usa Entrar.","Invalid TOTP code entered":"Código incorrecto o vencido. Escribe el código actual de Google Authenticator.","Signups not allowed for this instance":"El registro está cerrado. Usa Entrar."}; for(const k in t){ if(String(m).includes(k)) return t[k]; } return String(m); }
@@ -289,10 +291,15 @@ async function verAcceso(msg, tipo){ detalle=true; Auth.cargar(); await Auth.vig
     html+=`<div class="card">${row("Prueba de seguridad","Datos visibles ahora, sin doble verificación", pill(sin==="0"?"0 · correcto":String(sin), sin==="0"?"ok":"err"))}</div>
       <button class="btn2" onclick="accSalir()">Cerrar sesión</button>`;
   } else {
-    const p=await Auth.contar("programas"), e=await Auth.contar("eventos");
+    const p=await Auth.contar("programas"), e=await Auth.contar("eventos","event_id"), er=await Auth.contar("eventos_errores");
+    let fuentes=""; try{ const fs=await Auth.leer("v_resumen_fuentes?select=fuente_id,eventos,errores,semaforo,ultimo_evento&order=fuente_id");
+      fuentes=fs.map(f=>row(f.fuente_id, f.eventos+" eventos · "+f.errores+" con error"+(f.ultimo_evento?" · último "+new Date(f.ultimo_evento).toLocaleString("es-CO"):""), pill(f.semaforo, f.semaforo=="Al día"?"ok":(f.semaforo=="Sin datos"?"pend":"err")))).join(""); }
+    catch(x){ fuentes=row("Fuentes","Estado por fuente",pill(x.message,"err")); }
     html+=`<div class="card"><h2>Conectado con doble verificación</h2><p>Sesión segura activa (nivel aal2). Se cierra sola tras 15 minutos sin uso.</p></div>
       <div class="card">${row("Programas en el servidor","Lectura protegida por RLS",pill(String(p), /^\d+$/.test(p)?"ok":"err"))}
-      ${row("Eventos registrados","Llegarán en el hito H3",pill(String(e), /^\d+$/.test(e)?"ok":"err"))}</div>
+      ${row("Eventos registrados","Recibidos por el motor de eventos (H3)",pill(String(e), /^\d+$/.test(e)?"ok":"err"))}
+      ${row("Eventos con error","Rechazados y guardados en la cola de errores",pill(String(er), /^\d+$/.test(er)?"ok":"err"))}</div>
+      <div class="card"><h2>Fuentes de datos</h2>${fuentes}</div>
       ${aviso(msg,tipo)}
       <button class="btn2" onclick="accSalir()">Cerrar sesión</button>
       <button class="btn2" onclick="accSalirTodos()">Cerrar sesión en todos los dispositivos</button>`;
@@ -313,7 +320,7 @@ Auth.cargar();
 let actual="Pulso", detalle=false;
 function ir(n){ actual=n; detalle=false;
   document.getElementById("titulo").textContent=n;
-  document.getElementById("vista").innerHTML=V[n]();
+  document.getElementById("vista").innerHTML=`<p class="note">Referencia · sin conexión</p>`+V[n]();
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.v==n));
   window.scrollTo(0,0);
 }

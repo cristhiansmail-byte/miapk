@@ -1,0 +1,33 @@
+name: OE-MIAPK-002 · H3 · Pruebas del motor de eventos
+
+on:
+  push:
+    branches: [main]
+    paths: ["pruebas/fase1/h3_ejecutar.txt"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ejecutar pruebas H3 (laboratorio, USD 0)
+        env:
+          MIAPK_CRED_LAB: ${{ secrets.MIAPK_CRED_LAB }}
+        run: cd pruebas/fase1 && python3 h3_pruebas.py
+      - name: Guardar registro en la rama resultados
+        if: always()
+        run: |
+          mkdir /tmp/res /tmp/res_new && cp pruebas/fase1/h3_registro.jsonl /tmp/res_new/h3_registro_${{ github.run_number }}.jsonl
+          cd /tmp/res
+          git init -q -b resultados
+          git config user.name "MIAPK pruebas"
+          git config user.email "actions@github.com"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          if git fetch -q origin resultados; then git checkout -q origin/resultados -- . 2>/dev/null; git reset -q --soft origin/resultados; fi
+          cp /tmp/res_new/* . 2>/dev/null || true
+          git add . && git commit -q -m "H3 · pruebas del motor de eventos · ejecución ${{ github.run_number }}"
+          git push -q origin resultados
