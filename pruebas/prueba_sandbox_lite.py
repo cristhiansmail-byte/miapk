@@ -26,7 +26,8 @@ SANDBOX_AVATAR_ID = "dd73ea75-1218-4ef3-92ce-606d5f7fbc0a"  # Wayne, único avat
 AUDIO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mia_bienvenida_pcm16_24k.raw")
 CHUNK = 48000          # 1 s de PCM16 mono 24 kHz = 48 000 bytes (recomendado ~1 s, máx 1 MB)
 EN_CI = bool(os.environ.get("GITHUB_ACTIONS"))
-ESPERA_ESPECTADOR = 3 if EN_CI else 20 # segundos para abrir el visor antes de enviar audio
+VISOR = os.environ.get("MODO_VISOR") == "1"
+ESPERA_ESPECTADOR = 25 if VISOR else (3 if EN_CI else 20) # segundos para abrir el visor antes de enviar audio
 LOG = "registro_prueba.jsonl"
 T0 = time.monotonic()
 
@@ -48,6 +49,19 @@ def post(path, body, headers):
     except urllib.error.HTTPError as e:
         log("http", ruta=path, estado=e.code, ms=round((time.monotonic()-t)*1000), respuesta=e.read().decode(errors="replace")[:800])
         raise
+
+def publicar_visor(url, token):
+    """Publica URL y token de VISOR (temporales, ~1 min) en la rama privada 'visor' para que Dirección mire."""
+    import subprocess, tempfile
+    d = tempfile.mkdtemp()
+    json.dump({"livekit_url": url, "token": token}, open(os.path.join(d, "visor.json"), "w"))
+    repo = f"https://x-access-token:{os.environ['GITHUB_TOKEN']}@github.com/{os.environ['GITHUB_REPOSITORY']}"
+    cmds = [["git", "init", "-q", "-b", "visor"], ["git", "add", "."],
+            ["git", "-c", "user.name=MIAPK", "-c", "user.email=actions@github.com", "commit", "-q", "-m", "visor temporal"],
+            ["git", "push", "-q", "-f", repo, "visor"]]
+    for c in cmds:
+        subprocess.run(c, cwd=d, check=True)
+    log("visor_publicado")
 
 async def main():
     key = os.environ.get("LIVEAVATAR_API_KEY")
@@ -73,6 +87,8 @@ async def main():
     ws_url = s["ws_url"]
     log("sesion_iniciada", max_duracion_s=s.get("max_session_duration"))
     log("sala_livekit", url_presente=bool(s.get("livekit_url")), token_visor_presente=bool(s.get("livekit_client_token")))
+    if VISOR:
+        publicar_visor(s.get("livekit_url"), s.get("livekit_client_token"))
     if not EN_CI:
         print("\n=== VISOR: abre https://meet.livekit.io  → pestaña 'Custom' y pega: ===")
         print("URL   :", s.get("livekit_url"))

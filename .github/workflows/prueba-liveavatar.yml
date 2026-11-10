@@ -25,7 +25,9 @@ jobs:
       - name: Ejecutar prueba (Sandbox, USD 0)
         env:
           LIVEAVATAR_API_KEY: ${{ secrets.LIVEAVATAR_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          if grep -q observada pruebas/ejecutar.txt; then export MODO_VISOR=1; fi
           cd pruebas
           rm -f registro_prueba.jsonl
           if [ -z "$LIVEAVATAR_API_KEY" ]; then
