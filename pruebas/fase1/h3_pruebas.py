@@ -44,19 +44,20 @@ else:
     ext = f"lab-H3-{run}"
     e1 = evento_base(ext)
     casos = [
-        ("1 evento válido", lambda: ingerir(e1), "aceptado"),
-        ("2 doble envío idéntico", lambda: ingerir(e1), "duplicado"),
-        ("3 mismo external_id con otro event_id", lambda: ingerir({**e1, "event_id": str(uuid.uuid4())}), "duplicado"),
-        ("4 type inválido", lambda: ingerir({**evento_base(ext + "-x"), "type": "TipoMalo"}), "rechazado"),
-        ("5 dato no marcado ficticio", lambda: ingerir({**evento_base(ext + "-y"), "data": {"cliente": "real"}}), "rechazado"),
-        ("6 credencial falsa", lambda: ingerir(evento_base(ext + "-z"), cred="credencial-falsa-" + "0" * 32), "rechazado"),
-        ("7 suplantar otra fuente", lambda: ingerir({**evento_base(ext + "-w"), "fuente_id": "pasarela"}), "rechazado"),
+        ("1 evento válido", lambda: ingerir(e1), "aceptado", None),
+        ("2 doble envío idéntico", lambda: ingerir(e1), "duplicado", None),
+        ("3 mismo external_id con otro event_id", lambda: ingerir({**e1, "event_id": str(uuid.uuid4())}), "duplicado", None),
+        ("4 type inválido", lambda: ingerir({**evento_base(ext + "-x"), "type": "TipoMalo"}), "rechazado", "type inválido"),
+        ("5 dato no marcado ficticio", lambda: ingerir({**evento_base(ext + "-y"), "data": {"cliente": "real"}}), "rechazado", "ficticio"),
+        ("6 credencial falsa", lambda: ingerir(evento_base(ext + "-z"), cred="credencial-falsa-" + "0" * 32), "rechazado", "credencial inválida"),
+        ("7 suplantar otra fuente", lambda: ingerir({**evento_base(ext + "-w"), "fuente_id": "pasarela"}), "rechazado", "no coincide"),
     ]
-    for nombre, f, esperado in casos:
+    for nombre, f, esperado, motivo in casos:
         st, r = f()
         estado = r.get("estado") if isinstance(r, dict) else None
-        log(prueba=nombre, http=st, respuesta=r, esperado=esperado,
-            resultado="OK" if estado == esperado else "FALLA")
+        bien = estado == esperado and (motivo is None or motivo in str(r.get("motivo", "")))
+        log(prueba=nombre, http=st, respuesta=r, esperado=esperado + (f" ({motivo})" if motivo else ""),
+            resultado="OK" if bien else "FALLA")
 
     # 8. Escritura directa a la tabla (sin pasar por el motor) debe ser rechazada.
     st, r = http("POST", "/rest/v1/eventos", evento_base(ext + "-d"), {"Content-Profile": "miapk"})
