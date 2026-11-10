@@ -28,6 +28,10 @@ header h1{font-size:15px;font-weight:600;margin-top:10px;color:#DDF3F2}
 .btn{display:block;width:100%;text-align:center;background:var(--turq-osc);color:#fff;text-decoration:none;font-weight:700;font-size:15px;padding:14px;border-radius:12px;margin:6px 0}
 @media (prefers-color-scheme: dark){ .btn{background:var(--turq);color:#0F2133} }
 .legend .row .t{font-size:13px}
+input.f{width:100%;font:inherit;font-size:16px;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--txt);margin:6px 0}
+.btn2{display:block;width:100%;text-align:center;background:none;color:var(--turq-osc);border:1px solid var(--turq-osc);font:inherit;font-weight:700;font-size:14px;padding:12px;border-radius:12px;margin:6px 0}
+.msg{font-size:13px;margin-top:8px}.msg.err{color:var(--err)}.msg.ok{color:var(--ok)}
+.qr{background:#fff;border-radius:12px;padding:10px;text-align:center}.qr img{width:200px;height:200px}
 main{padding:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
 .card h2{font-size:15px;margin-bottom:6px}
@@ -70,6 +74,7 @@ const D = {
  actualizado: "10 nov 2026",
  urlActualizar: "https://github.com/cristhiansmail-byte/miapk/releases/latest",
  novedades: [
+  ["0.3.0","Acceso seguro al servidor de laboratorio con contraseña y doble verificación (código de Google Authenticator) · cierre de sesión por inactividad y en todos los dispositivos"],
   ["0.2.0","Sección Actualizar · estado de los activos gráficos aprobados · leyenda de estados del dato · avance de OE-MIA-001 y OE-MIAPK-001 al día"],
   ["0.1.0","Primera versión instalable: Pulso, Programas, Órdenes, Medición, MÍA y OSI"]
  ],
@@ -144,10 +149,12 @@ const D = {
 };
 const pill=(txt,c)=>`<span class="badge b-${c}">${txt}</span>`;
 const row=(t,d,b,attr="")=>`<div class="row ${attr?'tap':''}" ${attr}><div><div class="t">${t}</div><div class="d">${d}</div></div>${b||""}</div>`;
-const pie=`<p class="note">MIAPK v${ver()} · contenido de referencia actualizado al ${D.actualizado} · sin servidor todavía: nada se calcula en vivo.</p>`;
+const pie=`<p class="note">MIAPK v${ver()} · contenido de referencia actualizado al ${D.actualizado} · datos en vivo solo en Acceso seguro (laboratorio).</p>`;
 
 const V = {
  Pulso(){ return `
+  <div class="sec">Servidor de laboratorio</div>
+  <div class="card tap" onclick="verAcceso()">${row("Acceso seguro", Auth.resumen(), pill(Auth.nivel()=="aal2"?"Conectado":"Entrar", Auth.nivel()=="aal2"?"ok":"warn"))}</div>
   <div class="sec">Decisiones de Dirección</div>
   <div class="card">${D.decisiones.map(x=>row(x[0],x[1],pill(x[2]=="ok"?"Decidido":x[2]=="warn"?"Prioridad":"Pendiente",x[2]))).join("")}</div>
   <div class="sec">Órdenes activas</div>
@@ -202,7 +209,7 @@ const iconos={
  MÍA:'<path d="M4 5h16v11H10l-5 4v-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
  OSI:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
 };
-function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.2.0"; }catch(e){ return "0.2.0"; } }
+function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.3.0"; }catch(e){ return "0.3.0"; } }
 function verActualizar(){ detalle=true;
   document.getElementById("titulo").textContent="Actualizar";
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));
@@ -217,6 +224,92 @@ function verActualizar(){ detalle=true;
    <div class="card">${D.novedades.map(n=>row("Versión "+n[0],n[1])).join("")}</div>${pie}`;
   window.scrollTo(0,0);
 }
+/* ===== Acceso seguro (Fase 1 · H2) — solo laboratorio, datos ficticios ===== */
+const SB = { url: "https://nfposoxyrywtwjzyrslk.supabase.co", key: "sb_publishable_YLpZ72vbW7xQIfijnOPNIw_50GXkHzM" };
+const INACTIVIDAD_MS = 15*60*1000;
+const Auth = {
+  s: null,
+  cargar(){ try{ this.s = JSON.parse(localStorage.getItem("miapk_sesion")||"null"); }catch(e){ this.s=null; }
+            if(this.s && Date.now()-(this.s.ultimo||0) > INACTIVIDAD_MS){ this.borrar(); this.aviso="Tu sesión se cerró por inactividad."; } },
+  guardar(){ try{ localStorage.setItem("miapk_sesion", JSON.stringify(this.s)); }catch(e){} },
+  borrar(){ this.s=null; try{ localStorage.removeItem("miapk_sesion"); }catch(e){} },
+  tocar(){ if(this.s){ this.s.ultimo=Date.now(); this.guardar(); } },
+  claims(){ try{ return JSON.parse(atob(this.s.access_token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"))); }catch(e){ return {}; } },
+  nivel(){ return this.s ? (this.claims().aal||"aal1") : "ninguno"; },
+  resumen(){ const n=this.nivel(); return n=="aal2" ? "Sesión con doble verificación activa" : n=="aal1" ? "Falta el código de Google Authenticator" : "Sin sesión · contraseña + código"; },
+  async api(path, opts={}){
+    const h = { apikey: SB.key, "Content-Type":"application/json", ...(opts.headers||{}) };
+    if(this.s && !opts.sinToken) h.Authorization = "Bearer "+this.s.access_token;
+    const r = await fetch(SB.url+path, { method: opts.method||"GET", headers:h, body: opts.body?JSON.stringify(opts.body):undefined });
+    let j=null; try{ j=await r.json(); }catch(e){}
+    if(!r.ok){ const m=(j&&(j.msg||j.message||j.error_description||j.error))||("HTTP "+r.status); throw new Error(traducir(m)); }
+    return j;
+  },
+  fijar(j){ this.s={ access_token:j.access_token, refresh_token:j.refresh_token, expires_at: Date.now()+ (j.expires_in||3600)*1000, ultimo:Date.now() }; this.guardar(); },
+  async vigente(){ if(this.s && Date.now() > this.s.expires_at-60000){ try{ this.fijar(await this.api("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:{refresh_token:this.s.refresh_token},sinToken:true})); }catch(e){ this.borrar(); } } },
+  async entrar(email,clave){ this.fijar(await this.api("/auth/v1/token?grant_type=password",{method:"POST",body:{email,password:clave},sinToken:true})); },
+  async registrarse(email,clave){ return this.api("/auth/v1/signup",{method:"POST",body:{email,password:clave},sinToken:true}); },
+  async factores(){ const u=await this.api("/auth/v1/user"); return (u.factors||[]).filter(f=>f.factor_type=="totp"); },
+  async enrolar(){ return this.api("/auth/v1/factors",{method:"POST",body:{factor_type:"totp",friendly_name:"MIAPK "+new Date().toISOString().slice(0,10)}}); },
+  async verificar(factorId, codigo){ const c=await this.api("/auth/v1/factors/"+factorId+"/challenge",{method:"POST",body:{}}); this.fijar(await this.api("/auth/v1/factors/"+factorId+"/verify",{method:"POST",body:{challenge_id:c.id,code:codigo}})); },
+  async salirTodos(){ try{ await this.api("/auth/v1/logout?scope=global",{method:"POST"}); }catch(e){} this.borrar(); },
+  async contar(tabla){ const r=await fetch(SB.url+"/rest/v1/"+tabla+"?select=id",{headers:{apikey:SB.key,Authorization:"Bearer "+this.s.access_token,"Accept-Profile":"miapk",Prefer:"count=exact",Range:"0-0"}});
+    if(!r.ok){ return "rechazado ("+r.status+")"; } const cr=r.headers.get("content-range")||"*/0"; return cr.split("/")[1]; }
+};
+function traducir(m){ const t={"Invalid login credentials":"Correo o contraseña incorrectos.","Email not confirmed":"Falta confirmar tu correo: abre el mensaje de Supabase y toca el enlace.","User already registered":"Ese correo ya tiene acceso. Usa Entrar.","Invalid TOTP code entered":"Código incorrecto o vencido. Escribe el código actual de Google Authenticator.","Signups not allowed for this instance":"El registro está cerrado. Usa Entrar."}; for(const k in t){ if(String(m).includes(k)) return t[k]; } return String(m); }
+let pendienteQR=null;
+async function verAcceso(msg, tipo){ detalle=true; Auth.cargar(); await Auth.vigente(); Auth.tocar();
+  document.getElementById("titulo").textContent="Acceso seguro";
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));
+  const v=document.getElementById("vista"); const n=Auth.nivel();
+  const aviso = (m,t)=> m?`<p class="msg ${t||""}">${m}</p>`:"";
+  let html=`<a class="back" onclick="ir(actual)">← Volver</a>`;
+  if(n=="ninguno"){
+    html+=`<div class="card"><h2>Entrar a MIAPK</h2><p>Servidor de laboratorio · solo datos ficticios.</p>
+      <input class="f" id="em" type="email" autocomplete="username" placeholder="Correo" value="leverageinnerfocuseveryday@gmail.com">
+      <input class="f" id="pw" type="password" autocomplete="current-password" placeholder="Contraseña">
+      <button class="btn" onclick="accEntrar()">Entrar</button>
+      <button class="btn2" onclick="accRegistrar()">Primera vez: crear mi contraseña</button>
+      ${aviso(msg||Auth.aviso,tipo||(Auth.aviso?"err":""))}</div>`; Auth.aviso=null;
+  } else if(n=="aal1"){
+    let fs=[]; try{ fs=(await Auth.factores()).filter(f=>f.status=="verified"); }catch(e){ msg=e.message; tipo="err"; }
+    const sin=await Auth.contar("programas");
+    if(fs.length){
+      html+=`<div class="card"><h2>Paso 2 · Código de verificación</h2><p>Abre Google Authenticator y escribe el código de 6 dígitos de MIAPK.</p>
+        <input class="f" id="cod" inputmode="numeric" maxlength="6" placeholder="000000">
+        <button class="btn" onclick="accVerificar('${fs[0].id}')">Verificar</button>${aviso(msg,tipo)}</div>`;
+    } else {
+      if(!pendienteQR){ try{ pendienteQR=await Auth.enrolar(); }catch(e){ msg=e.message; tipo="err"; } }
+      html+=`<div class="card"><h2>Paso 2 · Activa tu doble verificación</h2>
+        <p>En Google Authenticator toca <b>+</b> → <b>Escanear un código QR</b>. Si no puedes escanear (estás en este mismo teléfono), toca <b>Ingresar clave de configuración</b> y copia la clave de abajo.</p>
+        ${pendienteQR?`<div class="qr"><img src="${pendienteQR.totp.qr_code}" alt="Código QR"></div><p class="mono">Clave: ${pendienteQR.totp.secret}</p>`:""}
+        <input class="f" id="cod" inputmode="numeric" maxlength="6" placeholder="Código de 6 dígitos">
+        <button class="btn" onclick="accVerificar('${pendienteQR?pendienteQR.id:""}')">Activar y verificar</button>${aviso(msg,tipo)}</div>`;
+    }
+    html+=`<div class="card">${row("Prueba de seguridad","Datos visibles ahora, sin doble verificación", pill(sin==="0"?"0 · correcto":String(sin), sin==="0"?"ok":"err"))}</div>
+      <button class="btn2" onclick="accSalir()">Cerrar sesión</button>`;
+  } else {
+    const p=await Auth.contar("programas"), e=await Auth.contar("eventos");
+    html+=`<div class="card"><h2>Conectado con doble verificación</h2><p>Sesión segura activa (nivel aal2). Se cierra sola tras 15 minutos sin uso.</p></div>
+      <div class="card">${row("Programas en el servidor","Lectura protegida por RLS",pill(String(p), /^\d+$/.test(p)?"ok":"err"))}
+      ${row("Eventos registrados","Llegarán en el hito H3",pill(String(e), /^\d+$/.test(e)?"ok":"err"))}</div>
+      ${aviso(msg,tipo)}
+      <button class="btn2" onclick="accSalir()">Cerrar sesión</button>
+      <button class="btn2" onclick="accSalirTodos()">Cerrar sesión en todos los dispositivos</button>`;
+  }
+  v.innerHTML=html+pie; window.scrollTo(0,0);
+}
+async function accEntrar(){ try{ await Auth.entrar(document.getElementById("em").value.trim(), document.getElementById("pw").value); verAcceso(); }catch(e){ verAcceso(e.message,"err"); } }
+async function accRegistrar(){ const em=document.getElementById("em").value.trim(), pw=document.getElementById("pw").value;
+  if(pw.length<12){ return verAcceso("Escribe una contraseña de al menos 12 caracteres y vuelve a tocar el botón.","err"); }
+  try{ await Auth.registrarse(em,pw); verAcceso("Listo. Te llegó un correo de Supabase: ábrelo y toca el enlace para confirmar (si después ves una página de error, no importa: la confirmación ya quedó). Luego vuelve aquí y toca Entrar.","ok"); }catch(e){ verAcceso(e.message,"err"); } }
+async function accVerificar(fid){ const c=(document.getElementById("cod").value||"").trim(); if(!/^\d{6}$/.test(c)) return verAcceso("Escribe los 6 dígitos del código.","err");
+  try{ await Auth.verificar(fid,c); pendienteQR=null; verAcceso("Doble verificación correcta.","ok"); }catch(e){ verAcceso(e.message,"err"); } }
+function accSalir(){ Auth.borrar(); pendienteQR=null; verAcceso("Sesión cerrada.","ok"); }
+async function accSalirTodos(){ await Auth.salirTodos(); pendienteQR=null; verAcceso("Se cerraron las sesiones en todos los dispositivos.","ok"); }
+document.addEventListener("click",()=>Auth.tocar(),true);
+setInterval(()=>{ Auth.cargar(); if(!Auth.s && Auth.aviso && document.getElementById("titulo").textContent=="Acceso seguro") verAcceso(); },60000);
+Auth.cargar();
 let actual="Pulso", detalle=false;
 function ir(n){ actual=n; detalle=false;
   document.getElementById("titulo").textContent=n;
