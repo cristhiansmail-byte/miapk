@@ -34,8 +34,8 @@ Lee este archivo completo antes de actuar. Lo dejó Magda (Claude en claude.ai) 
 | H4 · Indicador E04 en vivo | PASA CON OBSERVACIONES, cerrado para continuidad (nota `rhzaqt6pxg`); defectos D1 y D2 corregidos en v0.3.3 |
 | H5 · OSI experimental | PASA CON OBSERVACIONES (nota `7kng1zco3a`, APK v0.3.3) |
 | H6 · Respaldo y restauración | PASA CON OBSERVACIONES (nota `uzg3a00mwa`; workflow `h6-respaldo.yml`, secreto `MIAPK_DB_PASSWORD`, rama `respaldos`) |
-| **H7 · Informe para Magid** | Publicado el 11 nov (nota `oqi78cweqt`, SHA-256 `6e102eff…b665`, workflow `h7-informe.yml`); **esperando la comprobación de Magid** |
-| H8 · Cierre (10 bloques de E09) | Pendiente |
+| H7 · Informe para Magid | PASA CON OBSERVACIONES; Magid recalculó el hash y coincidió (nota `oqi78cweqt`) |
+| **H8 · Cierre (10 bloques de E09)** | Ejecutado el 11 nov: 3 PASA, 7 con observaciones, 0 FALLA (nota `7v4irdwmpm`, `pruebas/fase1/H8_cierre.md`, APK v0.3.5). **Esperando el dictamen de Magid y la decisión expresa de Dirección.** Propuesta de CSW 004 incluida |
 
 Pendientes obligatorios para H8 (dictamen de H2):
 - expiración real a los 15 min;
