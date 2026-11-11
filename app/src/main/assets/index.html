@@ -74,6 +74,7 @@ const D = {
  actualizado: "11 nov 2026",
  urlActualizar: "https://github.com/cristhiansmail-byte/miapk/releases/latest",
  novedades: [
+  ["0.4.2","Fase 2 · F2-H3: autenticador de respaldo (KeePassXC en tu laptop) · entrada diaria con un solo código · «Perdí mi autenticador principal» para emergencias · quitar y volver a registrar el respaldo"],
   ["0.4.1","Fase 2 · F2-H2: cerrar sesión y el cierre por inactividad también cierran la sesión en el servidor · el servidor niega todo a una sesión cerrada aunque su acceso no haya vencido · tres pruebas de revocación"],
   ["0.4.0","Fase 2 · F2-H1: la sesión se guarda cifrada con una clave del Android Keystore (ya no en la WebView) · botón «Diagnóstico de seguridad» · la app no se incluye en copias de Android"],
   ["0.3.5","«Cerrar sesión en todos los dispositivos» ahora cierra las sesiones en el servidor y dice cuántas cerró"],
@@ -223,7 +224,7 @@ const iconos={
  MÍA:'<path d="M4 5h16v11H10l-5 4v-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
  OSI:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
 };
-function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.4.1"; }catch(e){ return "0.4.1"; } }
+function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.4.2"; }catch(e){ return "0.4.2"; } }
 function verActualizar(){ detalle=true;
   document.getElementById("titulo").textContent="Actualizar";
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));
@@ -362,7 +363,30 @@ async function diagSeguridad(){
   el.innerHTML=`<div class="card"><h2>Diagnóstico de seguridad · F2-H1</h2><p class="note">${new Date().toLocaleString("es-CO",{hour12:false})} · ${conSesion?"con sesión abierta":"sin sesión"} · no muestra ningún secreto</p>${filas.join("")}<p class="msg ${total?"err":"ok"}">${total? total+" prueba(s) FALLA" : "Todas las pruebas PASA"}</p></div>`;
 }
 function traducir(m){ const t={"Invalid login credentials":"Correo o contraseña incorrectos.","Email not confirmed":"Falta confirmar tu correo: abre el mensaje de Supabase y toca el enlace.","User already registered":"Ese correo ya tiene acceso. Usa Entrar.","Invalid TOTP code entered":"Código incorrecto o vencido. Escribe el código actual de Google Authenticator.","Signups not allowed for this instance":"El registro está cerrado. Usa Entrar."}; for(const k in t){ if(String(m).includes(k)) return t[k]; } return String(m); }
-let pendienteQR=null;
+let pendienteQR=null, usandoRespaldo=false, pendienteResp=null;
+// F2-H3: un factor principal (Google Authenticator) y uno de respaldo (KeePassXC); el acceso diario pide un solo código.
+const esRespaldo = f => /^respaldo/i.test(f.friendly_name||"");
+const ordenarFactores = fs => fs.slice().sort((a,b)=>String(a.created_at).localeCompare(String(b.created_at)));
+async function pintarRespaldo(msg,tipo){ const el=document.getElementById("respaldo"); if(!el) return;
+  let fs=[]; try{ fs=await Auth.factores(); }catch(e){ el.innerHTML=`<p class="msg err">${e.message}</p>`; return; }
+  const ok=fs.filter(f=>f.status=="verified"), resp=ok.find(esRespaldo);
+  const a = msg?`<p class="msg ${tipo||""}">${msg}</p>`:"";
+  if(resp){ el.innerHTML=`<h2>Autenticador de respaldo</h2>${row("Registrado",(resp.friendly_name||"Respaldo")+" · "+new Date(resp.created_at).toLocaleString("es-CO",{hour12:false}),pill("Activo","ok"))}
+      <p>Solo se usa si pierdes tu autenticador principal. Para entrar cada día sigues usando un solo código.</p>
+      <button class="btn2" onclick="quitarRespaldo('${resp.id}')">Quitar autenticador de respaldo</button>${a}`; return; }
+  if(!pendienteResp){ el.innerHTML=`<h2>Autenticador de respaldo</h2>${row("Sin respaldo","Si pierdes este teléfono no podrías entrar",pill("Pendiente","pend"))}
+      <button class="btn" onclick="iniciarRespaldo()">Agregar autenticador de respaldo</button>${a}`; return; }
+  el.innerHTML=`<h2>Agregar autenticador de respaldo</h2>
+    <p>En tu <b>laptop</b>, en KeePassXC: crea una entrada «MIAPK respaldo», luego <b>Entrada → TOTP → Configurar TOTP</b> y escribe esta clave a mano. No la fotografíes ni la envíes a nadie.</p>
+    <p class="mono">${pendienteResp.totp.secret.replace(/(.{4})/g,"$1 ").trim()}</p>
+    <input class="f" id="codresp" inputmode="numeric" maxlength="6" placeholder="Código de 6 dígitos que muestra KeePassXC">
+    <button class="btn" onclick="confirmarRespaldo()">Confirmar respaldo</button>
+    <button class="btn2" onclick="cancelarRespaldo()">Cancelar</button>${a}`; }
+async function iniciarRespaldo(){ Auth.tocar(); try{ pendienteResp=await Auth.api("/auth/v1/factors",{method:"POST",body:{factor_type:"totp",friendly_name:"Respaldo "+new Date().toISOString().slice(0,16).replace("T"," ")}}); pintarRespaldo(); }catch(e){ pintarRespaldo(e.message,"err"); } }
+async function confirmarRespaldo(){ const c=(document.getElementById("codresp").value||"").trim(); if(!/^\d{6}$/.test(c)) return pintarRespaldo("Escribe los 6 dígitos que muestra KeePassXC.","err");
+  try{ await Auth.verificar(pendienteResp.id,c); pendienteResp=null; pintarRespaldo("Respaldo registrado y comprobado.","ok"); }catch(e){ pintarRespaldo(e.message,"err"); } }
+async function cancelarRespaldo(){ try{ if(pendienteResp) await Auth.api("/auth/v1/factors/"+pendienteResp.id,{method:"DELETE"}); }catch(e){} pendienteResp=null; pintarRespaldo("Registro de respaldo cancelado.","ok"); }
+async function quitarRespaldo(id){ Auth.tocar(); try{ await Auth.vigente(); await Auth.api("/auth/v1/factors/"+id,{method:"DELETE"}); pintarRespaldo("Autenticador de respaldo quitado: ese código ya no sirve para entrar.","ok"); }catch(e){ pintarRespaldo(e.message,"err"); } }
 async function verAcceso(msg, tipo){ detalle=true; Auth.cargar(); await Auth.vigente(); Auth.tocar();
   document.getElementById("titulo").textContent="Acceso seguro";
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));
@@ -378,12 +402,15 @@ async function verAcceso(msg, tipo){ detalle=true; Auth.cargar(); await Auth.vig
       <button class="btn2" onclick="diagSeguridad()">Diagnóstico de seguridad</button><div id="diag"></div>
       ${aviso(msg||Auth.aviso,tipo||(Auth.aviso?"err":""))}</div>`; Auth.aviso=null;
   } else if(n=="aal1"){
-    let fs=[]; try{ fs=(await Auth.factores()).filter(f=>f.status=="verified"); }catch(e){ msg=e.message; tipo="err"; }
+    let fs=[]; try{ fs=ordenarFactores((await Auth.factores()).filter(f=>f.status=="verified")); }catch(e){ msg=e.message; tipo="err"; }
+    const resp=fs.find(f=>esRespaldo(f)), princ=fs.find(f=>!esRespaldo(f))||fs[0];
     const sin=await Auth.contar("programas");
     if(fs.length){
-      html+=`<div class="card"><h2>Paso 2 · Código de verificación</h2><p>Abre Google Authenticator y escribe el código de 6 dígitos de MIAPK.</p>
+      const usarResp = usandoRespaldo && resp;
+      html+=`<div class="card"><h2>Paso 2 · Código de verificación</h2><p>${usarResp?"<b>Autenticador de respaldo:</b> abre KeePassXC en tu laptop y escribe el código de 6 dígitos de MIAPK.":"Abre Google Authenticator y escribe el código de 6 dígitos de MIAPK."}</p>
         <input class="f" id="cod" inputmode="numeric" maxlength="6" placeholder="000000">
-        <button class="btn" onclick="accVerificar('${fs[0].id}')">Verificar</button>${aviso(msg,tipo)}</div>`;
+        <button class="btn" onclick="accVerificar('${(usarResp?resp:princ).id}')">Verificar</button>
+        ${resp?(usarResp?`<a class="back" onclick="usandoRespaldo=false;verAcceso()">← Volver al autenticador principal</a>`:`<a class="back" onclick="usandoRespaldo=true;verAcceso()">Perdí mi autenticador principal → usar el de respaldo</a>`):""}${aviso(msg,tipo)}</div>`;
     } else {
       if(!pendienteQR){ try{ pendienteQR=await Auth.enrolar(); }catch(e){ msg=e.message; tipo="err"; } }
       html+=`<div class="card"><h2>Paso 2 · Activa tu doble verificación</h2>
@@ -401,6 +428,7 @@ async function verAcceso(msg, tipo){ detalle=true; Auth.cargar(); await Auth.vig
       fuentes=fs.map(f=>row(f.fuente_id, f.eventos+" eventos · "+f.errores+" con error"+(f.ultimo_evento?" · último "+new Date(f.ultimo_evento).toLocaleString("es-CO"):""), pill(f.semaforo, f.semaforo=="Al día"?"ok":(f.semaforo=="Sin datos"?"pend":"err")))).join(""); }
     catch(x){ fuentes=row("Fuentes","Estado por fuente",pill(x.message,"err")); }
     html+=`<div class="card"><h2>Conectado con doble verificación</h2><p>Sesión segura activa (nivel aal2). Se cierra sola tras 15 minutos sin uso.</p></div>
+      <div class="card" id="respaldo"><p class="note">Cargando autenticador de respaldo…</p></div>
       <div class="card">${row("Programas en el servidor","Lectura protegida por RLS",pill(String(p), /^\d+$/.test(p)?"ok":"err"))}
       ${row("Eventos registrados","Recibidos por el motor de eventos (H3)",pill(String(e), /^\d+$/.test(e)?"ok":"err"))}
       ${row("Eventos con error","Rechazados y guardados en la cola de errores",pill(String(er), /^\d+$/.test(er)?"ok":"err"))}
@@ -415,7 +443,7 @@ async function verAcceso(msg, tipo){ detalle=true; Auth.cargar(); await Auth.vig
       <button class="btn2" onclick="probarRevocacion('inactividad')">Prueba de revocación: inactividad</button>
       <button class="btn2" onclick="probarRevocacion('todos los dispositivos')">Prueba de revocación: todos los dispositivos</button><div id="diag"></div>`;
   }
-  v.innerHTML=html+pie; window.scrollTo(0,0); if(n=="aal2") Vivo.iniciar();
+  v.innerHTML=html+pie; window.scrollTo(0,0); if(n=="aal2"){ Vivo.iniciar(); pintarRespaldo(); }
 }
 async function accEntrar(){ try{ await Auth.entrar(document.getElementById("em").value.trim(), document.getElementById("pw").value); verAcceso(); }catch(e){ verAcceso(e.message,"err"); } }
 async function accRegistrar(){ const em=document.getElementById("em").value.trim(), pw=document.getElementById("pw").value;
