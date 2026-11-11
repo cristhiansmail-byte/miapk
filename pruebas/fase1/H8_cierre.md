@@ -74,3 +74,8 @@ Entorno de laboratorio, solo datos ficticios, **USD 0 gastados**. La Fase 1 **no
    - avatar o voz de pago (según la puerta de rentabilidad).
 
    Ninguna se activa sin un CSW y autorización expresa.
+
+## Decisión de Dirección
+**11 nov 2026, 11:39 COL** (literal, en el chat con Magda): «Apruebo el cierre documental de la Fase 1 de la OE-MIAPK-002 con reservas.»
+Fase 1: **CERRADA DOCUMENTALMENTE CON RESERVAS**. Siguen la prohibición de datos reales y el techo de USD 0, y no se autoriza producción ni la Fase 2.
+Propuesta siguiente: CSW 004 v1.0 en JetPost (nota `gpaqyikp0b`), pendiente del dictamen de Magid y de la aprobación de Dirección.
