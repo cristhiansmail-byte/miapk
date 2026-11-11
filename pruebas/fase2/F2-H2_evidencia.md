@@ -35,3 +35,9 @@ APK v0.4.1, SHA-256 `aac6af9a49fa7932fbd97197a35f22f4b20b4781d2841f5aa9995f43d8a
 - La inactividad se **simuló** adelantando el reloj interno de la app. La expiración real de 15 min se probó en la Fase 1 (11:26), y ahora usa el mismo camino de revocación.
 - Un JWT revocado sigue siendo aceptado por PostgREST como identidad, pero sin permisos. Las funciones públicas que no usan `es_direccion_mfa` (por ejemplo, la ingesta con credencial) no dependen de la sesión de usuario.
 - Si el teléfono está sin conexión al cerrar sesión, la revocación en el servidor no se confirma; la app lo avisa.
+
+## Adenda · vigencia del JWT (11 nov, 13:24 COL)
+- Verificado en el panel real de Supabase (plan Free), en **Authentication → Sessions → Access Tokens**: la «Access token expiry time» **sí es configurable en Free**. Se cambió de 3600 s a **600 s (10 min)** y el panel confirmó «Successfully updated access token settings». Tras recargar la página, el campo muestra 600. Captura `f2h2_capturas/4_panel_vigencia_600s.jpg`.
+- En el mismo panel, la opción «Detect and revoke potentially compromised refresh tokens» está **activada**.
+- Las opciones «Time-box user sessions», «Inactivity timeout» y «Single session per user» **son solo del plan Pro** y no se activaron (USD 0). La expiración por inactividad la sigue aplicando la app, con revocación en el servidor.
+- Efecto: un JWT robado sirve como máximo 10 min. Además, por la revocación ya probada, deja de tener permisos en cuanto se cierra su sesión. Los inicios de sesión nuevos mostrarán «vigencia del acceso: 10 min» en la prueba de revocación.
