@@ -1,0 +1,67 @@
+name: OE-MIAPK-002 · H6 · Respaldo y restauración aislada
+
+on:
+  push:
+    branches: [main]
+    paths: ["pruebas/fase1/h6_ejecutar.txt"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  respaldo:
+    runs-on: ubuntu-latest
+    services:
+      aislado:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: solo-local-aislado
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-retries 20
+    env:
+      ORIGEN: "host=aws-1-us-east-1.pooler.supabase.com port=5432 dbname=postgres user=postgres.nfposoxyrywtwjzyrslk sslmode=require"
+      COPIA: "host=localhost port=5432 dbname=postgres user=postgres password=solo-local-aislado"
+      PGPASSWORD: ${{ secrets.MIAPK_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cliente PostgreSQL 17
+        run: |
+          sudo apt-get install -y -q postgresql-common >/dev/null
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y >/dev/null
+          sudo apt-get install -y -q postgresql-client-17 >/dev/null
+          echo "/usr/lib/postgresql/17/bin" >> $GITHUB_PATH
+      - name: 1 · Exportar el esquema miapk (origen, solo lectura)
+        run: |
+          mkdir -p salida
+          if [ -z "$PGPASSWORD" ]; then echo "Falta el secreto MIAPK_DB_PASSWORD"; exit 1; fi
+          psql "$ORIGEN" -Atc "select version()" | tee salida/version_origen.txt
+          pg_dump "$ORIGEN" --schema=miapk --no-owner --no-privileges -Fp -f salida/respaldo.sql
+          psql "$ORIGEN" -q -f pruebas/fase1/h6_huellas.sql > salida/huellas_origen.json
+          sha256sum salida/respaldo.sql | tee salida/respaldo.sql.sha256
+      - name: 2 · Restaurar en entorno aislado (contenedor sin red hacia el origen)
+        run: |
+          unset PGPASSWORD
+          psql "$COPIA" -q -v ON_ERROR_STOP=1 <<'SQL'
+          -- Equivalentes mínimos de lo que Supabase provee fuera del esquema miapk
+          create role anon nologin; create role authenticated nologin;
+          create schema auth;
+          create function auth.jwt() returns jsonb language sql stable as $$ select '{}'::jsonb $$;
+          create function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
+          SQL
+          psql "$COPIA" -q -v ON_ERROR_STOP=1 -f salida/respaldo.sql
+          psql "$COPIA" -q -f pruebas/fase1/h6_huellas.sql > salida/huellas_copia.json
+      - name: 3 · Cotejar registros y huellas
+        run: python3 pruebas/fase1/h6_cotejo.py salida/huellas_origen.json salida/huellas_copia.json && cp h6_cotejo.json salida/
+      - name: Guardar respaldo y evidencia en la rama privada «respaldos»
+        if: always()
+        run: |
+          D=respaldo_$(date -u +%Y%m%dT%H%M%SZ)_run${{ github.run_number }}
+          mkdir -p /tmp/res/$D && cp -r salida/* /tmp/res/$D/ 2>/dev/null || true
+          cd /tmp/res
+          git init -q -b respaldos
+          git config user.name "MIAPK respaldos"
+          git config user.email "actions@github.com"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          if git fetch -q origin respaldos; then git checkout -q origin/respaldos -- . 2>/dev/null; git reset -q --soft origin/respaldos; fi
+          git add . && git commit -q -m "H6 · respaldo $D" && git push -q origin respaldos
