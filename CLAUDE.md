@@ -43,7 +43,7 @@ Lee este archivo completo antes de actuar. Lo dejó Magda (Claude en claude.ai) 
 - CSW 004 v1.1 (nota `wo4wi4i6kj`) aprobado por Dirección: «Apruebo el CSW 004 v1.1» (11 nov, 12:21, vía ChatGPT). OE-MIAPK-003: nota `uhw95lmvx6`.
 - Hitos F2-H1 → F2-H8 en secuencia. Ninguno avanza sin el dictamen de Magid. Si F2-H6 queda BLOQUEADO, no se inicia F2-H7.
 - Respaldo: opción A, manual y cifrado (age), al cerrar cada hito y antes de cada cambio de esquema; se guardan las 4 últimas copias.
-- **Estado: F2-H1 iniciado (11 nov, 12:25).** Antes de cambiar nada, respaldo SIN cifrar documentado como tal (el cifrado llega en F2-H5).
+- **F2-H1 hecho** (11 nov, 12:45): todo PASA en el Android de Dirección; APK v0.4.0 con sesión cifrada en el Keystore; nota `l4xhdm8j0b`, `pruebas/fase2/F2-H1_evidencia.md`. **Esperando el dictamen de Magid** antes de F2-H2.
 
 Requisito de Dirección para el acceso: el uso diario pide solo contraseña + 1 código TOTP; el segundo autenticador es solo respaldo; sin correo ni atajos.
 
