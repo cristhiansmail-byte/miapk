@@ -31,8 +31,9 @@ Lee este archivo completo antes de actuar. Lo dejó Magda (Claude en claude.ai) 
 | H1 · Esquema y RLS (21 tablas) | PASA |
 | H2 · Acceso con TOTP (aal2) | PASA. Dictamen Magid: aceptado con observaciones |
 | H3 · Motor de eventos (9/9) | PASA. Dictamen Magid: aceptado con observaciones; salvedades a–d ya atendidas |
-| **H4 · Indicador E04 en vivo** | **EN CURSO**, ver abajo |
-| H5–H8 | Pendientes. Ver la nota de la OE. No avanzar sin el dictamen de Magid |
+| H4 · Indicador E04 en vivo | PASA CON OBSERVACIONES, cerrado para continuidad (nota `rhzaqt6pxg`); defectos D1 y D2 corregidos en v0.3.3 |
+| **H5 · OSI experimental** | Hecho el 11 nov (nota `7kng1zco3a`, APK v0.3.3); **esperando el dictamen de Magid** |
+| H6–H8 | Pendientes. No avanzar sin el dictamen de Magid |
 
 Pendientes obligatorios para H8 (dictamen de H2):
 - expiración real a los 15 min;
@@ -43,7 +44,7 @@ Pendientes obligatorios para H8 (dictamen de H2):
 - factor TOTP de respaldo;
 - límite a la cola de errores vía anon.
 
-### H4: dónde quedó (10 nov, 14:32 COL)
+### H4: historial (cerrado)
 Magid autorizó el H4: un evento ficticio nuevo debe actualizar un indicador E04 en la APK en menos de 60 s, con trazabilidad, valor anterior y posterior, 5 estados, rechazo de duplicado y error, en el dispositivo real y con corroboración de Dirección.
 - Hecho: migración `0003` aplicada; vista `miapk.v_indicadores` («PFV aceptados»); APK **v0.3.2** instalada con la tarjeta «En vivo · laboratorio».
 - Ensayo SQL revertido: se vieron los 5 estados.
