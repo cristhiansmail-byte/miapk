@@ -1,0 +1,1 @@
+Longitud de la contraseña recibida: 16 caracteres (el valor no se muestra)

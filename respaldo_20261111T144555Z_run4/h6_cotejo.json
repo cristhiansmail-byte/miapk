@@ -1,0 +1,155 @@
+{
+ "tablas": [
+  {
+   "tabla": "actores",
+   "filas_origen": 2,
+   "filas_copia": 2,
+   "coincide": true
+  },
+  {
+   "tabla": "bitacora",
+   "filas_origen": 7,
+   "filas_copia": 7,
+   "coincide": true
+  },
+  {
+   "tabla": "casos_soporte",
+   "filas_origen": 0,
+   "filas_copia": 0,
+   "coincide": true
+  },
+  {
+   "tabla": "clientes",
+   "filas_origen": 0,
+   "filas_copia": 0,
+   "coincide": true
+  },
+  {
+   "tabla": "conversaciones",
+   "filas_origen": 0,
+   "filas_copia": 0,
+   "coincide": true
+  },
+  {
+   "tabla": "credenciales_fuente",
+   "filas_origen": 1,
+   "filas_copia": 1,
+   "coincide": true
+  },
+  {
+   "tabla": "csw",
+   "filas_origen": 0,
+   "filas_copia": 0,
+   "coincide": true
+  },
+  {
+   "tabla": "decisiones",
+   "filas_origen": 1,
+   "filas_copia": 1,
+   "coincide": true
+  },
+  {
+   "tabla": "entregas",
+   "filas_origen": 0,
+   "filas_copia": 0,
+   "coincide": true
+  },
+  {
+   "tabla": "eventos",
+   "filas_origen": 3,
+   "filas_copia": 3,
+   "coincide": true
+  },
+  {
+   "tabla": "eventos_errores",
+   "filas_origen": 12,
+   "filas_copia": 12,
+   "coincide": true
+  },
+  {
+   "tabla": "evidencias",
+   "filas_origen": 0,
+   "filas_copia": 0,
+   "coincide": true
+  },
+  {
+   "tabla": "fuentes",
+   "filas_origen": 4,
+   "filas_copia": 4,
+   "coincide": true
+  },
+  {
+   "tabla": "ordenes",
+   "filas_origen": 0,
+   "filas_copia": 0,
+   "coincide": true
+  },
+  {
+   "tabla": "osi_aprobaciones",
+   "filas_origen": 1,
+   "filas_copia": 1,
+   "coincide": true
+  },
+  {
+   "tabla": "osi_documentos",
+   "filas_origen": 1,
+   "filas_copia": 1,
+   "coincide": true
+  },
+  {
+   "tabla": "osi_transiciones",
+   "filas_origen": 4,
+   "filas_copia": 4,
+   "coincide": true
+  },
+  {
+   "tabla": "osi_versiones",
+   "filas_origen": 1,
+   "filas_copia": 1,
+   "coincide": true
+  },
+  {
+   "tabla": "pagos",
+   "filas_origen": 0,
+   "filas_copia": 0,
+   "coincide": true
+  },
+  {
+   "tabla": "pfv",
+   "filas_origen": 0,
+   "filas_copia": 0,
+   "coincide": true
+  },
+  {
+   "tabla": "programas",
+   "filas_origen": 8,
+   "filas_copia": 8,
+   "coincide": true
+  },
+  {
+   "tabla": "propuestas",
+   "filas_origen": 0,
+   "filas_copia": 0,
+   "coincide": true
+  },
+  {
+   "tabla": "proyectos",
+   "filas_origen": 0,
+   "filas_copia": 0,
+   "coincide": true
+  }
+ ],
+ "osi": [
+  {
+   "codigo": "OSI-LAB-001",
+   "version": "1.0",
+   "estado": "vigente",
+   "sha256_aprobado": "41d0e4c37de933906a06fee23ddba8c57823ba51d6d1c06a1dadd24c6bd070cc",
+   "sha256_copia": "41d0e4c37de933906a06fee23ddba8c57823ba51d6d1c06a1dadd24c6bd070cc",
+   "coincide": true
+  }
+ ],
+ "fallas": 0,
+ "bitacora_cadena_ok_copia": true,
+ "resultado": "PASA"
+}
