@@ -1,0 +1,38 @@
+name: OE-MIAPK-002 · H7 · Informe para Magid
+
+on:
+  push:
+    branches: [main]
+    paths: ["pruebas/fase1/h7_ejecutar.txt"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  informe:
+    runs-on: ubuntu-latest
+    env:
+      ORIGEN: "host=aws-1-us-east-1.pooler.supabase.com port=5432 dbname=postgres user=postgres.nfposoxyrywtwjzyrslk sslmode=require"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generar informe (solo lectura)
+        env:
+          PGPASSWORD: ${{ secrets.MIAPK_DB_PASSWORD }}
+        run: |
+          export PGPASSWORD="$(printf '%s' "$PGPASSWORD" | tr -d '[:space:]')"
+          git fetch -q origin respaldos && git show origin/respaldos:$(git ls-tree -d --name-only origin/respaldos | sort | tail -1)/respaldo.sql.sha256 > /tmp/respaldo.sha256 || echo "no disponible" > /tmp/respaldo.sha256
+          mkdir -p salida && cd salida
+          psql "$ORIGEN" -q -f ../pruebas/fase1/h7_datos.sql > datos_h7.json
+          python3 ../pruebas/fase1/h7_informe.py datos_h7.json /tmp/respaldo.sha256
+      - name: Guardar en la rama resultados
+        run: |
+          D=h7_${{ github.run_number }}
+          mkdir -p /tmp/res/$D && cp salida/* /tmp/res/$D/
+          cd /tmp/res
+          git init -q -b resultados
+          git config user.name "MIAPK pruebas"
+          git config user.email "actions@github.com"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          if git fetch -q origin resultados; then git checkout -q origin/resultados -- . 2>/dev/null; git reset -q --soft origin/resultados; fi
+          git add . && git commit -q -m "H7 · informe $D" && git push -q origin resultados
