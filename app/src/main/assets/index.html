@@ -74,6 +74,7 @@ const D = {
  actualizado: "11 nov 2026",
  urlActualizar: "https://github.com/cristhiansmail-byte/miapk/releases/latest",
  novedades: [
+  ["0.4.0","Fase 2 · F2-H1: la sesión se guarda cifrada con una clave del Android Keystore (ya no en la WebView) · botón «Diagnóstico de seguridad» · la app no se incluye en copias de Android"],
   ["0.3.5","«Cerrar sesión en todos los dispositivos» ahora cierra las sesiones en el servidor y dice cuántas cerró"],
   ["0.3.4","Cierre de Fase 1 (H8): sin conexión muestra el último dato con la hora y lo avisa · tiempo de cada consulta · correcciones del indicador · los intentos rechazados se registran"],
   ["0.3.3","OSI experimental en vivo (H5): documento ficticio con versión y huella SHA-256, aprobación y vigencia por Dirección desde la APK, alerta si el contenido se altera · órdenes al día (OE-MIAPK-002) · Medición sin la etiqueta «Pendiente» sobrante"],
@@ -221,7 +222,7 @@ const iconos={
  MÍA:'<path d="M4 5h16v11H10l-5 4v-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
  OSI:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
 };
-function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.3.5"; }catch(e){ return "0.3.5"; } }
+function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.4.0"; }catch(e){ return "0.4.0"; } }
 function verActualizar(){ detalle=true;
   document.getElementById("titulo").textContent="Actualizar";
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));
@@ -241,10 +242,15 @@ const SB = { url: "https://nfposoxyrywtwjzyrslk.supabase.co", key: "sb_publishab
 const INACTIVIDAD_MS = 15*60*1000;
 const Auth = {
   s: null,
-  cargar(){ try{ this.s = JSON.parse(localStorage.getItem("miapk_sesion")||"null"); }catch(e){ this.s=null; }
+  nativo(){ return !!(window.MIAPK && MIAPK.leerSesion); },
+  cargar(){ try{
+              const viejo = localStorage.getItem("miapk_sesion");               // migración desde v0.3.5 o anterior
+              if(viejo){ if(this.nativo()) MIAPK.guardarSesion(viejo); localStorage.removeItem("miapk_sesion"); }
+              if(this.nativo()){ const t = MIAPK.leerSesion(); this.s = t ? JSON.parse(t) : null; }
+            }catch(e){ this.s=null; }
             if(this.s && Date.now()-(this.s.ultimo||0) > INACTIVIDAD_MS){ this.borrar(); this.aviso="Tu sesión se cerró por inactividad."; } },
-  guardar(){ try{ localStorage.setItem("miapk_sesion", JSON.stringify(this.s)); }catch(e){} },
-  borrar(){ this.s=null; try{ localStorage.removeItem("miapk_sesion"); localStorage.removeItem("miapk_cache_vivo"); localStorage.removeItem("miapk_cache_osi"); }catch(e){} },
+  guardar(){ try{ if(this.nativo() && this.s) MIAPK.guardarSesion(JSON.stringify(this.s)); }catch(e){} },  // fuera de la app: solo en memoria
+  borrar(){ this.s=null; try{ if(this.nativo()) MIAPK.borrarSesion(); localStorage.removeItem("miapk_sesion"); localStorage.removeItem("miapk_cache_vivo"); localStorage.removeItem("miapk_cache_osi"); }catch(e){} },
   tocar(){ if(this.s){ this.s.ultimo=Date.now(); this.guardar(); } },
   claims(){ try{ return JSON.parse(atob(this.s.access_token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"))); }catch(e){ return {}; } },
   nivel(){ return this.s ? (this.claims().aal||"aal1") : "ninguno"; },
@@ -329,6 +335,27 @@ const OsiVivo = {
     try{ const r=await Auth.rpc("osi_poner_vigente",{p_version_id:id}); this.aviso= r.estado=="rechazado" ? ["Rechazado: "+r.motivo,"err"] : ["Vigente. Huella verificada: "+r.sha256.slice(0,16)+"…","ok"]; }catch(x){ this.aviso=[x.message,"err"]; }
     this.pintar(); }
 };
+async function diagSeguridad(){
+  const el=document.getElementById("diag"); if(!el) return;
+  const malo = v => /eyJ[\w-]+\.|refresh_token|access_token/.test(String(v||""));
+  const filas=[]; const r=(t,ok,d)=>filas.push(row(t,d,pill(ok?"PASA":"FALLA",ok?"ok":"err")));
+  let ls=[]; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(malo(localStorage.getItem(k))||k=="miapk_sesion") ls.push(k); } }catch(e){}
+  r("localStorage", ls.length==0, ls.length? "Con tokens: "+ls.join(", ") : "Sin tokens ("+localStorage.length+" claves revisadas)");
+  let ss=[]; try{ for(let i=0;i<sessionStorage.length;i++){ const k=sessionStorage.key(i); if(malo(sessionStorage.getItem(k))) ss.push(k); } }catch(e){}
+  r("sessionStorage", ss.length==0, ss.length? "Con tokens: "+ss.join(", ") : "Sin tokens");
+  r("Cookies", !malo(document.cookie) , document.cookie ? "Hay cookies, ninguna con token" : "Sin cookies");
+  let dbs=[]; try{ dbs = indexedDB.databases ? (await indexedDB.databases()).map(d=>d.name) : []; }catch(e){}
+  r("IndexedDB", dbs.length==0, dbs.length? "Bases: "+dbs.join(", ") : "Sin bases de datos");
+  let n={}; try{ n=JSON.parse(MIAPK.diagnostico()); }catch(e){ n={error:"sin puente nativo"}; }
+  const conSesion = !!Auth.s;
+  r("Sesión cifrada en el Keystore", conSesion ? (n.sesion_cifrada_guardada===true && n.clave_en_keystore===true) : (n.sesion_cifrada_guardada===false),
+    conSesion ? (n.sesion_cifrada_guardada? n.bytes_cifrados+" bytes cifrados (AES-256-GCM)" : "no se encontró") : (n.sesion_cifrada_guardada? "quedó una sesión guardada" : "vacío tras cerrar sesión"));
+  if(conSesion) r("Clave no exportable", n.clave_exportable===false, "Hardware seguro: "+n.clave_en_hardware_seguro);
+  r("Token legible en archivos de la app", n.token_legible_en_archivos===false, n.token_legible_en_archivos? "SE ENCONTRÓ TEXTO LEGIBLE" : "Solo datos cifrados");
+  r("Copias de Android desactivadas", n.respaldo_android_permitido===false, n.respaldo_android_permitido? "allowBackup activo" : "allowBackup desactivado");
+  const total = filas.filter(f=>f.includes("FALLA")).length;
+  el.innerHTML=`<div class="card"><h2>Diagnóstico de seguridad · F2-H1</h2><p class="note">${new Date().toLocaleString("es-CO",{hour12:false})} · ${conSesion?"con sesión abierta":"sin sesión"} · no muestra ningún secreto</p>${filas.join("")}<p class="msg ${total?"err":"ok"}">${total? total+" prueba(s) FALLA" : "Todas las pruebas PASA"}</p></div>`;
+}
 function traducir(m){ const t={"Invalid login credentials":"Correo o contraseña incorrectos.","Email not confirmed":"Falta confirmar tu correo: abre el mensaje de Supabase y toca el enlace.","User already registered":"Ese correo ya tiene acceso. Usa Entrar.","Invalid TOTP code entered":"Código incorrecto o vencido. Escribe el código actual de Google Authenticator.","Signups not allowed for this instance":"El registro está cerrado. Usa Entrar."}; for(const k in t){ if(String(m).includes(k)) return t[k]; } return String(m); }
 let pendienteQR=null;
 async function verAcceso(msg, tipo){ detalle=true; Auth.cargar(); await Auth.vigente(); Auth.tocar();
@@ -343,6 +370,7 @@ async function verAcceso(msg, tipo){ detalle=true; Auth.cargar(); await Auth.vig
       <input class="f" id="pw" type="password" autocomplete="current-password" placeholder="Contraseña">
       <button class="btn" onclick="accEntrar()">Entrar</button>
       <button class="btn2" onclick="accRegistrar()">Primera vez: crear mi contraseña</button>
+      <button class="btn2" onclick="diagSeguridad()">Diagnóstico de seguridad</button><div id="diag"></div>
       ${aviso(msg||Auth.aviso,tipo||(Auth.aviso?"err":""))}</div>`; Auth.aviso=null;
   } else if(n=="aal1"){
     let fs=[]; try{ fs=(await Auth.factores()).filter(f=>f.status=="verified"); }catch(e){ msg=e.message; tipo="err"; }
@@ -376,7 +404,8 @@ async function verAcceso(msg, tipo){ detalle=true; Auth.cargar(); await Auth.vig
       <div id="vivo"></div>
       ${aviso(msg,tipo)}
       <button class="btn2" onclick="accSalir()">Cerrar sesión</button>
-      <button class="btn2" onclick="accSalirTodos()">Cerrar sesión en todos los dispositivos</button>`;
+      <button class="btn2" onclick="accSalirTodos()">Cerrar sesión en todos los dispositivos</button>
+      <button class="btn2" onclick="diagSeguridad()">Diagnóstico de seguridad</button><div id="diag"></div>`;
   }
   v.innerHTML=html+pie; window.scrollTo(0,0); if(n=="aal2") Vivo.iniciar();
 }
