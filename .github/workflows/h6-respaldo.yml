@@ -34,8 +34,10 @@ jobs:
       - name: 1 · Exportar el esquema miapk (origen, solo lectura)
         run: |
           mkdir -p salida
+          export PGPASSWORD="$(printf '%s' "$PGPASSWORD" | tr -d '[:space:]')"
+          echo "Longitud de la contraseña recibida: ${#PGPASSWORD} caracteres (el valor no se muestra)" | tee salida/diagnostico.txt
           if [ -z "$PGPASSWORD" ]; then echo "Falta el secreto MIAPK_DB_PASSWORD"; exit 1; fi
-          psql "$ORIGEN" -Atc "select version()" | tee salida/version_origen.txt
+          psql "$ORIGEN" -Atc "select version()" 2>&1 | sed 's/password=[^ ]*//' | tee salida/version_origen.txt
           pg_dump "$ORIGEN" --schema=miapk --no-owner --no-privileges -Fp -f salida/respaldo.sql
           psql "$ORIGEN" -q -f pruebas/fase1/h6_huellas.sql > salida/huellas_origen.json
           sha256sum salida/respaldo.sql | tee salida/respaldo.sql.sha256
