@@ -1,0 +1,14 @@
+Output format is unaligned.
+BEGIN
+CREATE TABLE
+GRANT
+psql:pruebas/fase2/f2h2_verificar.sql:33: ERROR:  null value in column "objeto" of relation "bitacora" violates not-null constraint
+DETAIL:  Failing row contains (21, 2026-11-11 17:52:18.975446+00, null, osi.rechazo, null, {"aal": "aal2", "uid": "670323a1-83e0-4acf-9cc2-d264c9207465", "..., 79fbc7dba60816212c5c158ccdaad28ef133489d1d7e3b45450ddfd4f4a2d02d, 46b2c9f22c4df12f5d17804c6da044b7a65ba39b8edeff698f43b316f4b3ce54).
+CONTEXT:  SQL statement "insert into miapk.bitacora (actor_id, accion, objeto, detalle, hash_anterior, hash)
+  values (p_actor, p_accion, p_objeto, p_detalle, v_prev,
+          encode(sha256(convert_to(coalesce(v_prev, '') || p_detalle::text, 'UTF8')), 'hex'))"
+PL/pgSQL function miapk.bitacora_agregar(uuid,text,text,jsonb) line 5 at SQL statement
+SQL statement "SELECT miapk.bitacora_agregar(null, 'osi.rechazo', p_version_id::text, jsonb_build_object('intento', 'aprobar', 'uid', auth.uid(), 'aal', auth.jwt() ->> 'aal', 'motivo', 'no es Dirección con aal2'))"
+PL/pgSQL function miapk.osi_aprobar(uuid,text) line 5 at PERFORM
+PL/pgSQL assignment "r := miapk.osi_aprobar((select id from miapk.osi_versiones limit 1), 'prueba F2-H2')"
+PL/pgSQL function inline_code_block line 9 at assignment
