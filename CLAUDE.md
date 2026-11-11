@@ -37,7 +37,13 @@ Lee este archivo completo antes de actuar. Lo dejó Magda (Claude en claude.ai) 
 | H7 · Informe para Magid | PASA CON OBSERVACIONES; Magid recalculó el hash y coincidió (nota `oqi78cweqt`) |
 | H8 · Cierre (10 bloques de E09) | 3 PASA, 7 con observaciones, 0 FALLA (nota `7v4irdwmpm`, APK v0.3.5) |
 
-**FASE 1 CERRADA DOCUMENTALMENTE CON RESERVAS** por Dirección (11 nov, 11:39, frase literal). Siguiente paso: **CSW 004 v1.1** (propuesta corregida de Fase 2, nota `wo4wi4i6kj`; la v1.0 es `gpaqyikp0b`). Magid fijó la política de respaldo A (manual, cifrado, al cerrar cada hito y antes de cambios de esquema; últimas 4 copias). En espera de su dictamen y de la aprobación literal de Dirección. No iniciar la Fase 2 sin nueva OE.
+**FASE 1 CERRADA DOCUMENTALMENTE CON RESERVAS** por Dirección (11 nov, 11:39, frase literal).
+
+## Programa vigente: OE-MIAPK-003 (Fase 2, laboratorio, USD 0)
+- CSW 004 v1.1 (nota `wo4wi4i6kj`) aprobado por Dirección: «Apruebo el CSW 004 v1.1» (11 nov, 12:21, vía ChatGPT). OE-MIAPK-003: nota `uhw95lmvx6`.
+- Hitos F2-H1 → F2-H8 en secuencia. Ninguno avanza sin el dictamen de Magid. Si F2-H6 queda BLOQUEADO, no se inicia F2-H7.
+- Respaldo: opción A, manual y cifrado (age), al cerrar cada hito y antes de cada cambio de esquema; se guardan las 4 últimas copias.
+- **Estado: F2-H1 iniciado (11 nov, 12:25).** Antes de cambiar nada, respaldo SIN cifrar documentado como tal (el cifrado llega en F2-H5).
 
 Requisito de Dirección para el acceso: el uso diario pide solo contraseña + 1 código TOTP; el segundo autenticador es solo respaldo; sin correo ni atajos.
 
