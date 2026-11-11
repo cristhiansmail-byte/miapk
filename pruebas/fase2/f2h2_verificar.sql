@@ -5,14 +5,15 @@ begin;
 create temp table t (n text, r text);
 grant all on t to authenticated;
 do $$
-declare v_dir uuid; v_ses uuid; c bigint; r jsonb;
+declare v_dir uuid; v_ses uuid; c bigint; r jsonb; v_ver uuid;
 begin
   select auth_uid into v_dir from miapk.actores where hat='direccion';
+  select id into v_ver from miapk.osi_versiones where version='1.1';
   -- 1) token aal2 de Dirección con una sesión INEXISTENTE (equivale a sesión cerrada)
   perform set_config('request.jwt.claims', json_build_object('sub',v_dir,'aal','aal2','role','authenticated','session_id',gen_random_uuid())::text, true);
   set local role authenticated;
   select count(*) into c from miapk.programas; insert into t values ('1 sesión cerrada · lee programas', c||' filas');
-  r := miapk.osi_aprobar((select id from miapk.osi_versiones limit 1), 'prueba F2-H2'); insert into t values ('2 sesión cerrada · aprobar OSI', r->>'estado');
+  r := miapk.osi_aprobar(v_ver, 'prueba F2-H2'); insert into t values ('2 sesión cerrada · aprobar OSI', r->>'estado');
   reset role;
   -- 2) token sin session_id
   perform set_config('request.jwt.claims', json_build_object('sub',v_dir,'aal','aal2','role','authenticated')::text, true);
