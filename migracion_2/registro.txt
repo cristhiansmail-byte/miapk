@@ -1,0 +1,9 @@
+migracion=0007_f2h2_revocacion.sql
+fbdfdbbd6c9c5f90812cd3aea0527fd5fe14020dd5b92200cf2104e5b6e63e9f  supabase/migrations/0007_f2h2_revocacion.sql
+CREATE FUNCTION
+REVOKE
+GRANT
+CREATE FUNCTION
+REVOKE
+GRANT
+APLICADA

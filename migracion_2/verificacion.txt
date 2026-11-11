@@ -1,0 +1,12 @@
+Output format is unaligned.
+BEGIN
+CREATE TABLE
+GRANT
+DO
+1 sesión cerrada · lee programas → 0 filas
+2 sesión cerrada · aprobar OSI → rechazado
+3 token sin session_id · lee programas → 0 filas
+4 control sesión viva · lee programas → 8 filas
+5 misma sesión tras borrarla · lee programas → 0 filas
+anon puede leer auth.sessions: false · authenticated: false
+ROLLBACK
