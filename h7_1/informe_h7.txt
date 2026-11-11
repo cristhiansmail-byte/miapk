@@ -1,0 +1,53 @@
+INFORME MIAPK PARA MAGID · OE-MIAPK-002 · H7
+Entorno: LABORATORIO · DATOS FICTICIOS · sin clientes ni operaciones reales · USD 0
+Corte: 2026-11-11 10:08:16 (Bogotá) = 2026-11-11T15:08:16Z
+Emisor: Magda (Claude), consulta de solo lectura al servidor miapk-laboratorio (Supabase Free)
+Entrega: importación asistida por JetPost (Nóah copia el relevo); no hay integración automática MIAPK-ChatGPT
+
+1. FUENTES DE DATOS (origen y frescura)
+- jetpost: confianza 4, integrada=no, estado=activa, eventos=0, errores atribuidos=0, último evento=—, semáforo=Sin datos
+- laboratorio: confianza 1, integrada=sí, estado=activa, eventos=3, errores atribuidos=4, último evento=2026-11-11 07:39:35, semáforo=Con errores recientes
+- mia_web: confianza 1, integrada=no, estado=pendiente, eventos=0, errores atribuidos=0, último evento=—, semáforo=Sin datos
+- pasarela: confianza 1, integrada=no, estado=pendiente, eventos=0, errores atribuidos=0, último evento=—, semáforo=Sin datos
+
+2. INDICADORES E04 (estado del dato)
+- PFV aceptados: valor=2 (anterior 1), estado=Confirmado, último evento fe5feacf-5efe-468f-bd9a-9a01949e4c21 recibido 2026-11-11 07:39:35, último error 2026-11-10 14:31:00
+- Conversaciones calificadas: estado=Pendiente (sin fuente integrada; no es cero)
+- Tasa de comprensión confirmada: estado=Pendiente (sin fuente integrada; no es cero)
+- Vista previa a tiempo: estado=Pendiente (sin fuente integrada; no es cero)
+- Correcciones atendidas: estado=Pendiente (sin fuente integrada; no es cero)
+- Conversión informada: estado=Pendiente (sin fuente integrada; no es cero)
+- Tiempo a propuesta: estado=Pendiente (sin fuente integrada; no es cero)
+- Tasa de aceptación de entregas: estado=Pendiente (sin fuente integrada; no es cero)
+- Defectos de publicación: estado=Pendiente (sin fuente integrada; no es cero)
+- Cumplimiento de órdenes: estado=Pendiente (sin fuente integrada; no es cero)
+- Ingresos verificados: estado=Pendiente (sin fuente integrada; no es cero)
+- Costo de IA por PFV: estado=Pendiente (sin fuente integrada; no es cero)
+- Margen por entrega: estado=Pendiente (sin fuente integrada; no es cero)
+- Satisfacción del cliente: estado=Pendiente (sin fuente integrada; no es cero)
+- Retención: estado=Pendiente (sin fuente integrada; no es cero)
+- Salud documental OSI: estado=Pendiente (sin fuente integrada; no es cero)
+
+3. EVENTOS
+- Total aceptados: 3
+  - entrega.pfv.aceptado: 2
+  - laboratorio.prueba.registrada: 1
+- Total en cola de errores: 12
+  - origen «prueba H4»: 1
+  - origen «prueba negativa H3»: 11
+
+4. OSI EXPERIMENTAL
+- OSI-LAB-001 v1.0: estado=vigente, integridad=Íntegro, ficticio=sí, sha256 aprobado=41d0e4c37de933906a06fee23ddba8c57823ba51d6d1c06a1dadd24c6bd070cc
+
+5. TRAZABILIDAD
+- Bitácora: 7 entradas, cadena continua=sí, último hash=47fd6be15678ca2a3382c901fded5b60d360ba2a442474b6b6d510536d9021b5
+- Decisiones de Dirección registradas: 1
+- Programas en el servidor: 8
+- Actores activos: direccion (persona), magda (agente)
+- Último respaldo verificado (H6): respaldo.sql sha256=6b6e130649ba8bb6bafc3cd4873e9f6af70c933dd0ac7c7e1df56c3e78684b58
+
+6. LÍMITES DE ESTE INFORME
+- Cifras de laboratorio con datos ficticios; no describen actividad comercial.
+- Generado por consulta directa de Magda; Magid lo recibe por JetPost, no del servidor.
+- La huella SHA-256 prueba que el texto recibido es idéntico al emitido, no que los datos sean correctos; la conciliación se hace con las consultas de pruebas/fase1/h7_datos.sql.
+FIN DEL INFORME
