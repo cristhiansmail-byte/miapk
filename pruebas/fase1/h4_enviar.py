@@ -4,11 +4,13 @@ La credencial llega solo por MIAPK_CRED_LAB (secreto de GitHub) y nunca se impri
 import json, os, uuid, urllib.request, urllib.error, datetime as dt
 URL = "https://nfposoxyrywtwjzyrslk.supabase.co"
 KEY = "sb_publishable_YLpZ72vbW7xQIfijnOPNIw_50GXkHzM"
-accion, ext = open("h4_ejecutar.txt").read().split()[:2]
+partes = open("h4_ejecutar.txt").read().split(); accion, ext = partes[:2]; causa = partes[2] if len(partes) > 2 else None
 ahora = dt.datetime.now(dt.timezone.utc)
 ev = {"event_id": str(uuid.uuid4()), "type": "entrega.pfv.aceptado", "occurred_at": ahora.isoformat(),
       "external_id": ext, "subject_entity": "entrega", "subject_id": "ENT-FICTICIA-" + ext,
       "origen": "prueba H4", "data": {"ficticio": True, "cliente": "Cliente Ficticio S.A.S.", "nota": "PFV aceptado de prueba H4"}}
+if accion == "correccion":
+    ev["type"] = "entrega.pfv.revertido"; ev["causation_id"] = causa; ev["origen"] = "prueba H8"; ev["data"]["nota"] = "Corrección: se revierte el PFV " + str(causa)
 if accion == "error":
     ev.pop("subject_id")          # evento inválido a propósito
 req = urllib.request.Request(URL + "/rest/v1/rpc/miapk_ingerir_evento", method="POST",

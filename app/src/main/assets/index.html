@@ -74,6 +74,7 @@ const D = {
  actualizado: "11 nov 2026",
  urlActualizar: "https://github.com/cristhiansmail-byte/miapk/releases/latest",
  novedades: [
+  ["0.3.4","Cierre de Fase 1 (H8): sin conexión muestra el último dato con la hora y lo avisa · tiempo de cada consulta · correcciones del indicador · los intentos rechazados se registran"],
   ["0.3.3","OSI experimental en vivo (H5): documento ficticio con versión y huella SHA-256, aprobación y vigencia por Dirección desde la APK, alerta si el contenido se altera · órdenes al día (OE-MIAPK-002) · Medición sin la etiqueta «Pendiente» sobrante"],
   ["0.3.2","Indicador en vivo (H4): «PFV aceptados» se actualiza solo cada 10 segundos con valor anterior, estado, último evento y tiempo de llegada · errores separados por origen (pruebas negativas vs. incidentes)"],
   ["0.3.1","Motor de eventos del laboratorio (H3): contador de eventos corregido · eventos con error · estado de cada fuente · pestañas de referencia rotuladas «Referencia · sin conexión»"],
@@ -219,7 +220,7 @@ const iconos={
  MÍA:'<path d="M4 5h16v11H10l-5 4v-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
  OSI:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
 };
-function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.3.3"; }catch(e){ return "0.3.3"; } }
+function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.3.4"; }catch(e){ return "0.3.4"; } }
 function verActualizar(){ detalle=true;
   document.getElementById("titulo").textContent="Actualizar";
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));
@@ -242,7 +243,7 @@ const Auth = {
   cargar(){ try{ this.s = JSON.parse(localStorage.getItem("miapk_sesion")||"null"); }catch(e){ this.s=null; }
             if(this.s && Date.now()-(this.s.ultimo||0) > INACTIVIDAD_MS){ this.borrar(); this.aviso="Tu sesión se cerró por inactividad."; } },
   guardar(){ try{ localStorage.setItem("miapk_sesion", JSON.stringify(this.s)); }catch(e){} },
-  borrar(){ this.s=null; try{ localStorage.removeItem("miapk_sesion"); }catch(e){} },
+  borrar(){ this.s=null; try{ localStorage.removeItem("miapk_sesion"); localStorage.removeItem("miapk_cache_vivo"); localStorage.removeItem("miapk_cache_osi"); }catch(e){} },
   tocar(){ if(this.s){ this.s.ultimo=Date.now(); this.guardar(); } },
   claims(){ try{ return JSON.parse(atob(this.s.access_token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"))); }catch(e){ return {}; } },
   nivel(){ return this.s ? (this.claims().aal||"aal1") : "ninguno"; },
@@ -269,6 +270,10 @@ const Auth = {
   async contar(tabla,col){ const r=await fetch(SB.url+"/rest/v1/"+tabla+"?select="+(col||"id"),{headers:{apikey:SB.key,Authorization:"Bearer "+this.s.access_token,"Accept-Profile":"miapk",Prefer:"count=exact",Range:"0-0"}});
     if(!r.ok){ return "rechazado ("+r.status+")"; } const cr=r.headers.get("content-range")||"*/0"; return cr.split("/")[1]; }
 };
+const Cache = {
+  poner(k,v){ try{ localStorage.setItem("miapk_cache_"+k, JSON.stringify({t:Date.now(), v})); }catch(e){} },
+  tomar(k){ try{ return JSON.parse(localStorage.getItem("miapk_cache_"+k)); }catch(e){ return null; } }
+};
 const Vivo = {
   timer:null, visto:{}, prev:null,
   claseEstado(e){ return e=="Confirmado"?"ok":(e=="Desactualizado"?"warn":(e=="Error"?"err":"pend")); },
@@ -277,15 +282,17 @@ const Vivo = {
   async pintar(){ const el=document.getElementById("vivo"); if(!el) return;
     Auth.cargar(); await Auth.vigente();
     if(Auth.nivel()!="aal2"){ el.innerHTML=`<div class="card"><h2>En vivo · laboratorio</h2><p>Para ver indicadores en vivo entra en <a onclick="verAcceso()">Acceso seguro</a> con tu código.</p></div>`; return; }
-    let i; try{ i=(await Auth.leer("v_indicadores?select=*"))[0]; }catch(x){ el.innerHTML=`<div class="card"><h2>En vivo · laboratorio</h2>${row("PFV aceptados","No se pudo consultar",pill(x.message,"err"))}</div>`; return; }
+    let i, ms, offline=null; const t0=performance.now();
+    try{ i=(await Auth.leer("v_indicadores?select=*"))[0]; ms=Math.round(performance.now()-t0); Cache.poner("vivo",i); }
+    catch(x){ const c=Cache.tomar("vivo"); if(!c){ el.innerHTML=`<div class="card"><h2>En vivo · laboratorio</h2>${row("PFV aceptados","No se pudo consultar y no hay datos guardados",pill("Sin conexión","err"))}</div>`; return; } i=c.v; offline=c.t; }
     const ahora=Date.now(); let llegada="—";
     if(i.ultimo_event_id){ if(!this.visto[i.ultimo_event_id]) this.visto[i.ultimo_event_id]=ahora;
       const seg=Math.round((this.visto[i.ultimo_event_id]-new Date(i.ultimo_received_at).getTime())/1000);
       llegada=this.hora(i.ultimo_received_at)+" · apareció aquí a los "+Math.max(seg,0)+" s"; }
     const cambio = this.prev && this.prev.valor!==i.valor ? ` <b>(cambió de ${this.prev.valor} a ${i.valor} a las ${this.hora(ahora)})</b>` : "";
     this.prev=i;
-    el.innerHTML=`<div class="card"><h2>En vivo · laboratorio</h2><p class="note">Datos ficticios · se actualiza solo cada 10 s · última consulta ${this.hora(ahora)}</p>
-      ${row("PFV aceptados","Valor "+i.valor+" · anterior "+(i.valor_anterior??"—")+cambio,pill(i.estado,this.claseEstado(i.estado)))}
+    el.innerHTML=`<div class="card"><h2>En vivo · laboratorio</h2>${offline?`<p class="msg err">Sin conexión · mostrando el último dato guardado (${new Date(offline).toLocaleString("es-CO",{hour12:false})})</p>`:`<p class="note">Datos ficticios · se actualiza solo cada 10 s · última consulta ${this.hora(ahora)} · respondió en ${ms} ms</p>`}
+      ${row("PFV aceptados","Valor "+i.valor+" · anterior "+(i.valor_anterior??"—")+(i.correcciones?" · correcciones "+i.correcciones:"")+cambio,pill(i.estado,this.claseEstado(i.estado)))}
       ${row("Último evento","Recibido "+llegada,"")}
       ${row("Último error de este indicador",i.ultimo_error_at?this.hora(i.ultimo_error_at):"Ninguno","")}</div>`;
   }
@@ -297,24 +304,25 @@ const OsiVivo = {
   async pintar(){ const el=document.getElementById("osivivo"); if(!el) return;
     Auth.cargar(); await Auth.vigente();
     if(Auth.nivel()!="aal2"){ el.innerHTML=`<div class="card"><h2>OSI experimental · en vivo</h2><p>Para ver y aprobar documentos de prueba entra en <a onclick="verAcceso()">Acceso seguro</a> con tu código.</p></div>`; return; }
-    let ds; try{ ds=await Auth.leer("v_osi_integridad?select=*&order=codigo,version"); }catch(x){ el.innerHTML=`<div class="card"><h2>OSI experimental · en vivo</h2>${row("Documentos","No se pudo consultar",pill(x.message,"err"))}</div>`; return; }
+    let ds, offline=null; try{ ds=await Auth.leer("v_osi_integridad?select=*&order=codigo,version"); Cache.poner("osi",ds); }
+    catch(x){ const c=Cache.tomar("osi"); if(!c){ el.innerHTML=`<div class="card"><h2>OSI experimental · en vivo</h2>${row("Documentos","No se pudo consultar y no hay datos guardados",pill("Sin conexión","err"))}</div>`; return; } ds=c.v; offline=c.t; }
     const h=t=>t?new Date(t).toLocaleTimeString("es-CO",{hour12:false}):"—";
-    let html=`<div class="card"><h2>OSI experimental · en vivo</h2><p class="note">Solo documentos ficticios · sin custodia legal · se verifica cada 10 s · última verificación ${h(Date.now())}</p>`;
+    let html=`<div class="card"><h2>OSI experimental · en vivo</h2>`+(offline?`<p class="msg err">Sin conexión · último estado guardado (${new Date(offline).toLocaleString("es-CO",{hour12:false})}); no se puede aprobar sin conexión</p>`:`<p class="note">Solo documentos ficticios · sin custodia legal · se verifica cada 10 s · última verificación ${h(Date.now())}</p>`);
     ds.forEach(d=>{ const alt=d.integridad!="Íntegro";
       html+=row(d.codigo+" · v"+d.version, d.titulo, this.pillEstado(d.estado));
       html+=row("Huella SHA-256", d.sha256_actual.slice(0,16)+"…"+(d.sha256_aprobado?" · aprobada "+d.sha256_aprobado.slice(0,8)+"…":""), pill(alt?"ALERTA: ALTERADO":"Íntegro", alt?"err":"ok"));
-      if(d.estado=="en_revision") html+=`<input class="f" id="ositx_${d.version_id}" value="Apruebo ${d.codigo} versión ${d.version}."><button class="btn" onclick="OsiVivo.aprobar('${d.version_id}')">Aprobar esta versión</button>`;
-      if(d.estado=="aprobado") html+=`<button class="btn" onclick="OsiVivo.vigente('${d.version_id}')">Poner vigente</button>`;
+      if(!offline && d.estado=="en_revision") html+=`<input class="f" id="ositx_${d.version_id}" value="Apruebo ${d.codigo} versión ${d.version}."><button class="btn" onclick="OsiVivo.aprobar('${d.version_id}')">Aprobar esta versión</button>`;
+      if(!offline && d.estado=="aprobado") html+=`<button class="btn" onclick="OsiVivo.vigente('${d.version_id}')">Poner vigente</button>`;
     });
     if(!ds.length) html+=`<p>No hay documentos de prueba todavía.</p>`;
     if(this.aviso) html+=`<p class="msg ${this.aviso[1]}">${this.aviso[0]}</p>`;
     el.innerHTML=html+`</div>`;
   },
   async aprobar(id){ const t=(document.getElementById("ositx_"+id)||{}).value||""; Auth.tocar();
-    try{ const r=await Auth.rpc("osi_aprobar",{p_version_id:id,p_texto_literal:t}); this.aviso=["Aprobado. Huella registrada: "+r.sha256.slice(0,16)+"…","ok"]; }catch(x){ this.aviso=[x.message,"err"]; }
+    try{ const r=await Auth.rpc("osi_aprobar",{p_version_id:id,p_texto_literal:t}); this.aviso= r.estado=="rechazado" ? ["Rechazado: "+r.motivo,"err"] : ["Aprobado. Huella registrada: "+r.sha256.slice(0,16)+"…","ok"]; }catch(x){ this.aviso=[x.message,"err"]; }
     document.activeElement && document.activeElement.blur && document.activeElement.blur(); this.pintar(); },
   async vigente(id){ Auth.tocar();
-    try{ const r=await Auth.rpc("osi_poner_vigente",{p_version_id:id}); this.aviso=["Vigente. Huella verificada: "+r.sha256.slice(0,16)+"…","ok"]; }catch(x){ this.aviso=[x.message,"err"]; }
+    try{ const r=await Auth.rpc("osi_poner_vigente",{p_version_id:id}); this.aviso= r.estado=="rechazado" ? ["Rechazado: "+r.motivo,"err"] : ["Vigente. Huella verificada: "+r.sha256.slice(0,16)+"…","ok"]; }catch(x){ this.aviso=[x.message,"err"]; }
     this.pintar(); }
 };
 function traducir(m){ const t={"Invalid login credentials":"Correo o contraseña incorrectos.","Email not confirmed":"Falta confirmar tu correo: abre el mensaje de Supabase y toca el enlace.","User already registered":"Ese correo ya tiene acceso. Usa Entrar.","Invalid TOTP code entered":"Código incorrecto o vencido. Escribe el código actual de Google Authenticator.","Signups not allowed for this instance":"El registro está cerrado. Usa Entrar."}; for(const k in t){ if(String(m).includes(k)) return t[k]; } return String(m); }
