@@ -1,1 +1,1 @@
-F2-H1 · respaldo previo (sin cifrar; cifrado llega en F2-H5)
+F2-H2 · respaldo previo al cambio de esquema (sin cifrar; cifrado en F2-H5)
