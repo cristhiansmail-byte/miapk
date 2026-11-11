@@ -1,0 +1,42 @@
+name: MIAPK · Aplicar migración y verificar (laboratorio)
+
+on:
+  push:
+    branches: [main]
+    paths: ["supabase/aplicar.txt"]
+
+permissions:
+  contents: write
+
+jobs:
+  migrar:
+    runs-on: ubuntu-latest
+    env:
+      ORIGEN: "host=aws-1-us-east-1.pooler.supabase.com port=5432 dbname=postgres user=postgres.nfposoxyrywtwjzyrslk sslmode=require"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Aplicar (una transacción; se detiene ante cualquier error)
+        env:
+          PGPASSWORD: ${{ secrets.MIAPK_DB_PASSWORD }}
+        run: |
+          export PGPASSWORD="$(printf '%s' "$PGPASSWORD" | tr -d '[:space:]')"
+          mkdir -p salida
+          M=$(head -1 supabase/aplicar.txt | tr -d '[:space:]')
+          V=$(sed -n 2p supabase/aplicar.txt | tr -d '[:space:]')
+          echo "migracion=$M" > salida/registro.txt
+          sha256sum "supabase/migrations/$M" >> salida/registro.txt
+          psql "$ORIGEN" -v ON_ERROR_STOP=1 --single-transaction -f "supabase/migrations/$M" >> salida/registro.txt 2>&1 && echo "APLICADA" >> salida/registro.txt || { echo "FALLÓ (revertida)" >> salida/registro.txt; cat salida/registro.txt; exit 1; }
+          if [ -n "$V" ]; then psql "$ORIGEN" -v ON_ERROR_STOP=1 -f "$V" > salida/verificacion.txt 2>&1 || true; fi
+          cat salida/registro.txt salida/verificacion.txt 2>/dev/null
+      - name: Guardar registro en la rama resultados
+        if: always()
+        run: |
+          D=migracion_${{ github.run_number }}
+          mkdir -p /tmp/res/$D && cp salida/* /tmp/res/$D/ 2>/dev/null || true
+          cd /tmp/res
+          git init -q -b resultados
+          git config user.name "MIAPK pruebas"
+          git config user.email "actions@github.com"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          if git fetch -q origin resultados; then git checkout -q origin/resultados -- . 2>/dev/null; git reset -q --soft origin/resultados; fi
+          git add . && git commit -q -m "Migración $D" && git push -q origin resultados
