@@ -1,0 +1,89 @@
+# MIAPK · Contexto para Claude Code
+
+Lee este archivo completo antes de actuar. Lo dejó Magda (Claude en claude.ai) el 11 nov 2026 para continuar el trabajo aquí.
+
+## Quiénes
+- **Dirección:** Nóah Bentzadik (cuenta Jetpost "Darshan Bhakti Vinód"). Llámalo **Nóah**. Responde siempre en **español**.
+- **Magda:** nombre de Claude en este proyecto. **Maguid/Magid:** ChatGPT, que da las órdenes (CSW/OE) en Jetpost.
+- Flujo: Maguid emite órdenes y dictámenes en Jetpost → Magda ejecuta y deja evidencia en Jetpost → Dirección aprueba. Ningún agente despierta al otro; Nóah hace el relevo.
+
+## Cómo trabajar con Nóah (obligatorio)
+- Haz tú todo lo que puedas; pídele solo lo que de verdad no puedes hacer (contraseñas, códigos, inicios de sesión suyos).
+- Después de cada informe, termina con **instrucciones concretas** para él: lista numerada, **una sola acción por punto**.
+- No le sugieras cosas que no pidió. No le pidas permiso para reemplazar lo necesario.
+- Cuando escriba solo **«JetPost»**: revisa lo nuevo en Jetpost (workspace `darshan-bhakti-vinod`) e infórmale.
+
+## Reglas de seguridad y gasto (no negociables)
+- **Presupuesto USD 0.** Prohibido registrar tarjeta, activar consumo facturable o aceptar pruebas que se conviertan en pago.
+- **Solo datos ficticios.** Sin clientes ni documentos reales. Nada productivo.
+- Secretos solo en GitHub Secrets o en el servidor; **nunca** en la APK, en Jetpost, en el chat ni en el código.
+- Nunca escribas contraseñas ni códigos de verificación (OTP/TOTP) por Nóah.
+- No declares aprobado un CSW/OE sin la frase literal de Dirección. No declares PASA un hito sin la corroboración visual de Dirección cuando la orden la exige.
+- Pendiente por decisión de Dirección: la conexión directa de ChatGPT a MIAPK (MCP). Avatar o TTS de pago: «sin gastos por ahora».
+
+## Programa vigente: OE-MIAPK-002 (Fase 1, laboratorio)
+- Basada en el CSW 003 v1.1, aprobado por Dirección el 10 nov.
+- Nota de la orden en Jetpost: `e901uktzrw`.
+- Hitos H1–H8:
+
+| Hito | Estado |
+|---|---|
+| H1 · Esquema y RLS (21 tablas) | PASA |
+| H2 · Acceso con TOTP (aal2) | PASA. Dictamen Magid: aceptado con observaciones |
+| H3 · Motor de eventos (9/9) | PASA. Dictamen Magid: aceptado con observaciones; salvedades a–d ya atendidas |
+| **H4 · Indicador E04 en vivo** | **EN CURSO**, ver abajo |
+| H5–H8 | Pendientes. Ver la nota de la OE. No avanzar sin el dictamen de Magid |
+
+Pendientes obligatorios para H8 (dictamen de H2):
+- expiración real a los 15 min;
+- cerrar sesión en todos los dispositivos;
+- segundo usuario aal2 sin rol;
+- que REST no eluda la RLS;
+- almacenamiento seguro de tokens;
+- factor TOTP de respaldo;
+- límite a la cola de errores vía anon.
+
+### H4: dónde quedó (10 nov, 14:32 COL)
+Magid autorizó el H4: un evento ficticio nuevo debe actualizar un indicador E04 en la APK en menos de 60 s, con trazabilidad, valor anterior y posterior, 5 estados, rechazo de duplicado y error, en el dispositivo real y con corroboración de Dirección.
+- Hecho: migración `0003` aplicada; vista `miapk.v_indicadores` («PFV aceptados»); APK **v0.3.2** instalada con la tarjeta «En vivo · laboratorio».
+- Ensayo SQL revertido: se vieron los 5 estados.
+- Envíos reales (`h4_registro_1..3` en la rama `resultados`):
+  1. `pfv lab-H4-1` aceptado (19:29:39 UTC). Dirección confirmó que la APK se actualizó sola: 0 → 1 · Confirmado.
+  2. `duplicado lab-H4-1` → duplicado.
+  3. `error lab-H4-2` → rechazado. Dirección confirmó el error a las 14:31.
+- **Falta:**
+  1. El número de segundos de «apareció aquí a los … s», que Nóah aún no reportó.
+  2. Escribir `pruebas/fase1/H4_evidencia.md`.
+  3. Crear la nota Jetpost «OE-MIAPK-002 · Evidencia H4 · …» y pedir el dictamen de Magid mencionando a "Darshan’s ChatGPT".
+
+### Otra instrucción de Magid (no cambia la OE)
+Directriz de Dirección para MÍA Web (nota Jetpost `lm33wen9dk`):
+1. Primero chat escrito.
+2. Después, acompañar la creación del sitio.
+3. Avatar solo si se demuestra que es rentable.
+
+Incorporarla al roadmap y a los CSW futuros, sin tocar el CSW 003 ni la OE-MIAPK-002.
+
+## Infraestructura
+- **Repo:** `cristhiansmail-byte/miapk` (privado), rama `main`. El APK se compila en GitHub Actions (`build-apk.yml`) con una clave de firma fija (`app/miapk-v01.keystore`) para que actualice encima, y se publica en Releases y en la rama `apk`.
+- **Cada versión nueva de la APK se le entrega a Nóah directamente.** Sube `versionCode` y `versionName` en `app/build.gradle.kts` y agrega la novedad en `D.novedades`, en `app/src/main/assets/index.html`.
+- **App:** wrapper WebView en Java (`MainActivity.java`) más `assets/index.html`. Seis pestañas: Pulso, Programas, Órdenes, Medición, MÍA y OSI. «Acceso seguro» habla directo con Supabase Auth REST.
+- **Supabase Free** `miapk-laboratorio`:
+  - ref `nfposoxyrywtwjzyrslk`, URL `https://nfposoxyrywtwjzyrslk.supabase.co`;
+  - clave publicable `sb_publishable_YLpZ72vbW7xQIfijnOPNIw_50GXkHzM` (es pública);
+  - esquema `miapk`, signups cerrados, RLS forzado, `miapk.es_direccion_mfa()`.
+  - Migraciones en `supabase/migrations/0001–0003`. Se aplicaron pegándolas en el SQL Editor del panel, porque no hay token de la CLI.
+  - Free = sin backups automáticos y pausa tras 1 semana sin uso: no generar actividad artificial.
+- **Ingesta:** `public.miapk_ingerir_evento(credencial, evento)` (security definer). La credencial de la fuente `laboratorio` está en el secreto de GitHub `MIAPK_CRED_LAB`, que creó Nóah; en la BD solo se guarda su hash.
+- **Workflows:**
+  - `prueba-eventos.yml` (H3, se dispara con `pruebas/fase1/h3_ejecutar.txt`);
+  - `h4-emisor.yml` (se dispara con `pruebas/fase1/h4_ejecutar.txt`, contenido `pfv|duplicado|error <external_id>`);
+  - `prueba-liveavatar.yml` (OE-MIA-001, cerrada).
+  - Los registros redactados van a la rama `resultados`.
+- **Evidencias:** `pruebas/fase1/H1..H3_evidencia.md`.
+
+## Notas Jetpost clave (workspace `darshan-bhakti-vinod`)
+- `e901uktzrw`: OE-MIAPK-002.
+- `41oupzbxgm`: Evidencia H2.
+- `g1jd4gjyo2`: Evidencia H3, con el dictamen y la autorización de H4.
+- `lm33wen9dk`: directriz de MÍA Web.
