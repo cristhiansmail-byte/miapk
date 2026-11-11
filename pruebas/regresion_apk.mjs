@@ -17,5 +17,7 @@ ok(!/localStorage\.setItem\("miapk_sesion"/.test(html), "F2-H1: la sesión ya no
 ok(html.includes("MIAPK.guardarSesion(") && html.includes("MIAPK.borrarSesion()"), "F2-H1: la sesión usa el almacén nativo cifrado");
 const man = readFileSync(new URL("../app/src/main/AndroidManifest.xml", import.meta.url), "utf8");
 ok(man.includes('android:allowBackup="false"') && man.includes("dataExtractionRules"), "F2-H1: copias de Android desactivadas");
+ok(/async function accSalir\(\)\{[^\n]*revocarCon\(viejo,"local"\)/.test(html), "F2-H2: «Cerrar sesión» revoca la sesión en el servidor");
+ok(/INACTIVIDAD_MS\)\{[^\n]*revocarCon\(viejo,"local"\)/.test(html), "F2-H2: el cierre por inactividad revoca en el servidor");
 if (fallas.length) { console.error(fallas.length + " regresión(es)"); process.exit(1); }
 console.log("Regresión de la APK: PASA");

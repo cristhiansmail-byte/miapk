@@ -74,6 +74,7 @@ const D = {
  actualizado: "11 nov 2026",
  urlActualizar: "https://github.com/cristhiansmail-byte/miapk/releases/latest",
  novedades: [
+  ["0.4.1","Fase 2 · F2-H2: cerrar sesión y el cierre por inactividad también cierran la sesión en el servidor · el servidor niega todo a una sesión cerrada aunque su acceso no haya vencido · tres pruebas de revocación"],
   ["0.4.0","Fase 2 · F2-H1: la sesión se guarda cifrada con una clave del Android Keystore (ya no en la WebView) · botón «Diagnóstico de seguridad» · la app no se incluye en copias de Android"],
   ["0.3.5","«Cerrar sesión en todos los dispositivos» ahora cierra las sesiones en el servidor y dice cuántas cerró"],
   ["0.3.4","Cierre de Fase 1 (H8): sin conexión muestra el último dato con la hora y lo avisa · tiempo de cada consulta · correcciones del indicador · los intentos rechazados se registran"],
@@ -222,7 +223,7 @@ const iconos={
  MÍA:'<path d="M4 5h16v11H10l-5 4v-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
  OSI:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
 };
-function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.4.0"; }catch(e){ return "0.4.0"; } }
+function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.4.1"; }catch(e){ return "0.4.1"; } }
 function verActualizar(){ detalle=true;
   document.getElementById("titulo").textContent="Actualizar";
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));
@@ -248,7 +249,11 @@ const Auth = {
               if(viejo){ if(this.nativo()) MIAPK.guardarSesion(viejo); localStorage.removeItem("miapk_sesion"); }
               if(this.nativo()){ const t = MIAPK.leerSesion(); this.s = t ? JSON.parse(t) : null; }
             }catch(e){ this.s=null; }
-            if(this.s && Date.now()-(this.s.ultimo||0) > INACTIVIDAD_MS){ this.borrar(); this.aviso="Tu sesión se cerró por inactividad."; } },
+            if(this.s && Date.now()-(this.s.ultimo||0) > INACTIVIDAD_MS){ const viejo=this.s; this.borrar(); this.aviso="Tu sesión se cerró por inactividad."; this.revocando=this.revocarCon(viejo,"local"); } },
+  // F2-H2: revoca la sesión en el servidor antes de olvidarla (si el acceso venció, lo renueva primero solo para poder cerrarlo).
+  async revocarCon(sess, scope){ if(!sess) return false; let tok=sess.access_token;
+    try{ if(Date.now() > (sess.expires_at||0)-30000){ const r=await fetch(SB.url+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{apikey:SB.key,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:sess.refresh_token})}); if(r.ok) tok=(await r.json()).access_token; }
+         const r=await fetch(SB.url+"/auth/v1/logout?scope="+(scope||"local"),{method:"POST",headers:{apikey:SB.key,Authorization:"Bearer "+tok}}); return r.ok || r.status==204; }catch(e){ return false; } },
   guardar(){ try{ if(this.nativo() && this.s) MIAPK.guardarSesion(JSON.stringify(this.s)); }catch(e){} },  // fuera de la app: solo en memoria
   borrar(){ this.s=null; try{ if(this.nativo()) MIAPK.borrarSesion(); localStorage.removeItem("miapk_sesion"); localStorage.removeItem("miapk_cache_vivo"); localStorage.removeItem("miapk_cache_osi"); }catch(e){} },
   tocar(){ if(this.s){ this.s.ultimo=Date.now(); this.guardar(); } },
@@ -405,7 +410,10 @@ async function verAcceso(msg, tipo){ detalle=true; Auth.cargar(); await Auth.vig
       ${aviso(msg,tipo)}
       <button class="btn2" onclick="accSalir()">Cerrar sesión</button>
       <button class="btn2" onclick="accSalirTodos()">Cerrar sesión en todos los dispositivos</button>
-      <button class="btn2" onclick="diagSeguridad()">Diagnóstico de seguridad</button><div id="diag"></div>`;
+      <button class="btn2" onclick="diagSeguridad()">Diagnóstico de seguridad</button>
+      <button class="btn2" onclick="probarRevocacion('cerrar sesión')">Prueba de revocación: cerrar sesión</button>
+      <button class="btn2" onclick="probarRevocacion('inactividad')">Prueba de revocación: inactividad</button>
+      <button class="btn2" onclick="probarRevocacion('todos los dispositivos')">Prueba de revocación: todos los dispositivos</button><div id="diag"></div>`;
   }
   v.innerHTML=html+pie; window.scrollTo(0,0); if(n=="aal2") Vivo.iniciar();
 }
@@ -415,7 +423,29 @@ async function accRegistrar(){ const em=document.getElementById("em").value.trim
   try{ await Auth.registrarse(em,pw); verAcceso("Listo. Te llegó un correo de Supabase: ábrelo y toca el enlace para confirmar (si después ves una página de error, no importa: la confirmación ya quedó). Luego vuelve aquí y toca Entrar.","ok"); }catch(e){ verAcceso(e.message,"err"); } }
 async function accVerificar(fid){ const c=(document.getElementById("cod").value||"").trim(); if(!/^\d{6}$/.test(c)) return verAcceso("Escribe los 6 dígitos del código.","err");
   try{ await Auth.verificar(fid,c); pendienteQR=null; verAcceso("Doble verificación correcta.","ok"); }catch(e){ verAcceso(e.message,"err"); } }
-function accSalir(){ Auth.borrar(); pendienteQR=null; verAcceso("Sesión cerrada.","ok"); }
+async function accSalir(){ const viejo=Auth.s; Auth.borrar(); pendienteQR=null; const ok=await Auth.revocarCon(viejo,"local"); verAcceso(ok?"Sesión cerrada en este teléfono y en el servidor.":"Sesión cerrada en este teléfono; el servidor no confirmó el cierre (sin conexión).", ok?"ok":"err"); }
+// F2-H2: prueba de revocación con el acceso anterior (se guarda solo en memoria y nunca se muestra).
+async function probarRevocacion(modo){
+  const el=document.getElementById("diag"); Auth.cargar(); if(Auth.nivel()!="aal2"){ el.innerHTML=`<p class="msg err">Entra con tu código antes de la prueba.</p>`; return; }
+  const tok=Auth.s.access_token; const c=Auth.claims(); const vigMin=Math.round(((c.exp||0)-(c.iat||0))/60);
+  const h={apikey:SB.key,Authorization:"Bearer "+tok,"Accept-Profile":"miapk"};
+  const leer=async()=>{ const r=await fetch(SB.url+"/rest/v1/programas?select=id",{headers:{...h,Prefer:"count=exact",Range:"0-0"}}); return r.ok?(r.headers.get("content-range")||"*/?").split("/")[1]:"rechazado ("+r.status+")"; };
+  const aprobar=async(id)=>{ const r=await fetch(SB.url+"/rest/v1/rpc/osi_aprobar",{method:"POST",headers:{...h,"Content-Profile":"miapk","Content-Type":"application/json"},body:JSON.stringify({p_version_id:id,p_texto_literal:"prueba F2-H2 de revocación"})}); let j=null; try{ j=await r.json(); }catch(e){} return r.ok?(j&&j.estado)||"?":"rechazado ("+r.status+")"; };
+  let id=null; try{ const r=await fetch(SB.url+"/rest/v1/v_osi_integridad?select=version_id&estado=eq.vigente",{headers:h}); id=((await r.json())[0]||{}).version_id; }catch(e){}
+  const antes=await leer();
+  el.innerHTML=`<p class="msg">Probando «${modo}»… no cierres la app (hasta 60 s).</p>`;
+  const t0=Date.now(); let accion="";
+  if(modo=="cerrar sesión"){ const v=Auth.s; Auth.borrar(); accion=(await Auth.revocarCon(v,"local"))?"servidor confirmó":"servidor NO confirmó"; }
+  else if(modo=="todos los dispositivos"){ const r=await Auth.salirTodos(); accion=r.n!==null?"servidor cerró "+r.n+" sesión(es)":"servidor NO confirmó"; }
+  else { Auth.s.ultimo=Date.now()-INACTIVIDAD_MS-1000; Auth.guardar(); Auth.cargar(); accion=(await Auth.revocando)?"servidor confirmó":"servidor NO confirmó"; }
+  const filas=[]; let ok=false, seg=0;
+  for(let i=0;i<20;i++){ seg=Math.round((Date.now()-t0)/1000); const n=await leer(), a=id?await aprobar(id):"sin documento";
+    filas.push(row(seg+" s","programas: "+n+" · aprobar OSI: "+a,""));
+    if((n==="0"||/rechazado/.test(n)) && /rechazado/.test(a)){ ok=true; break; } await new Promise(r=>setTimeout(r,3000)); }
+  el.innerHTML=`<div class="card"><h2>Prueba de revocación · ${modo}</h2><p class="note">${new Date().toLocaleString("es-CO",{hour12:false})} · acceso anterior guardado solo en memoria · vigencia del acceso: ${vigMin} min</p>
+    ${row("Antes de cerrar","programas: "+antes,"")}${row("Cierre",accion,"")}${filas.join("")}
+    <p class="msg ${ok?"ok":"err"}">${ok?"PASA: el acceso anterior quedó sin permisos a los "+seg+" s":"FALLA: el acceso anterior seguía con permisos a los "+seg+" s"}</p></div>`;
+}
 async function accSalirTodos(){ const r=await Auth.salirTodos(); pendienteQR=null;
   if(r.n!==null) verAcceso("Se cerraron "+r.n+" sesiones en todos los dispositivos."+(r.msg.length?" ("+r.msg.join(" · ")+")":""),"ok");
   else verAcceso("No se pudo confirmar el cierre en el servidor: "+r.msg.join(" · ")+". Esta sesión local sí se cerró.","err"); }
