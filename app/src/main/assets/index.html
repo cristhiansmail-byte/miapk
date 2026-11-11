@@ -74,6 +74,7 @@ const D = {
  actualizado: "11 nov 2026",
  urlActualizar: "https://github.com/cristhiansmail-byte/miapk/releases/latest",
  novedades: [
+  ["0.3.5","«Cerrar sesión en todos los dispositivos» ahora cierra las sesiones en el servidor y dice cuántas cerró"],
   ["0.3.4","Cierre de Fase 1 (H8): sin conexión muestra el último dato con la hora y lo avisa · tiempo de cada consulta · correcciones del indicador · los intentos rechazados se registran"],
   ["0.3.3","OSI experimental en vivo (H5): documento ficticio con versión y huella SHA-256, aprobación y vigencia por Dirección desde la APK, alerta si el contenido se altera · órdenes al día (OE-MIAPK-002) · Medición sin la etiqueta «Pendiente» sobrante"],
   ["0.3.2","Indicador en vivo (H4): «PFV aceptados» se actualiza solo cada 10 segundos con valor anterior, estado, último evento y tiempo de llegada · errores separados por origen (pruebas negativas vs. incidentes)"],
@@ -220,7 +221,7 @@ const iconos={
  MÍA:'<path d="M4 5h16v11H10l-5 4v-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
  OSI:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
 };
-function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.3.4"; }catch(e){ return "0.3.4"; } }
+function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.3.5"; }catch(e){ return "0.3.5"; } }
 function verActualizar(){ detalle=true;
   document.getElementById("titulo").textContent="Actualizar";
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));
@@ -266,7 +267,10 @@ const Auth = {
   async leer(ruta){ const r=await fetch(SB.url+"/rest/v1/"+ruta,{headers:{apikey:SB.key,Authorization:"Bearer "+this.s.access_token,"Accept-Profile":"miapk"}}); if(!r.ok) throw new Error("rechazado ("+r.status+")"); return r.json(); },
   async rpc(fn,body){ await this.vigente(); const r=await fetch(SB.url+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SB.key,Authorization:"Bearer "+this.s.access_token,"Content-Profile":"miapk","Content-Type":"application/json"},body:JSON.stringify(body)});
     let j=null; try{ j=await r.json(); }catch(e){} if(!r.ok) throw new Error((j&&j.message)||("rechazado ("+r.status+")")); return j; },
-  async salirTodos(){ try{ await this.api("/auth/v1/logout?scope=global",{method:"POST"}); }catch(e){} this.borrar(); },
+  async salirTodos(){ await this.vigente(); let n=null, msg=[];
+    try{ const r=await this.rpc("cerrar_mis_sesiones",{}); n=r.sesiones; }catch(e){ msg.push("servidor: "+e.message); }
+    try{ const r=await fetch(SB.url+"/auth/v1/logout?scope=global",{method:"POST",headers:{apikey:SB.key,Authorization:"Bearer "+(this.s?this.s.access_token:"")}}); if(!r.ok && r.status!=401 && r.status!=403) msg.push("auth: HTTP "+r.status); }catch(e){ msg.push("auth: "+e.message); }
+    this.borrar(); return {n, msg}; },
   async contar(tabla,col){ const r=await fetch(SB.url+"/rest/v1/"+tabla+"?select="+(col||"id"),{headers:{apikey:SB.key,Authorization:"Bearer "+this.s.access_token,"Accept-Profile":"miapk",Prefer:"count=exact",Range:"0-0"}});
     if(!r.ok){ return "rechazado ("+r.status+")"; } const cr=r.headers.get("content-range")||"*/0"; return cr.split("/")[1]; }
 };
@@ -383,7 +387,9 @@ async function accRegistrar(){ const em=document.getElementById("em").value.trim
 async function accVerificar(fid){ const c=(document.getElementById("cod").value||"").trim(); if(!/^\d{6}$/.test(c)) return verAcceso("Escribe los 6 dígitos del código.","err");
   try{ await Auth.verificar(fid,c); pendienteQR=null; verAcceso("Doble verificación correcta.","ok"); }catch(e){ verAcceso(e.message,"err"); } }
 function accSalir(){ Auth.borrar(); pendienteQR=null; verAcceso("Sesión cerrada.","ok"); }
-async function accSalirTodos(){ await Auth.salirTodos(); pendienteQR=null; verAcceso("Se cerraron las sesiones en todos los dispositivos.","ok"); }
+async function accSalirTodos(){ const r=await Auth.salirTodos(); pendienteQR=null;
+  if(r.n!==null) verAcceso("Se cerraron "+r.n+" sesiones en todos los dispositivos."+(r.msg.length?" ("+r.msg.join(" · ")+")":""),"ok");
+  else verAcceso("No se pudo confirmar el cierre en el servidor: "+r.msg.join(" · ")+". Esta sesión local sí se cerró.","err"); }
 document.addEventListener("click",()=>Auth.tocar(),true);
 setInterval(()=>{ Auth.cargar(); if(!Auth.s && Auth.aviso && document.getElementById("titulo").textContent=="Acceso seguro") verAcceso(); },60000);
 Auth.cargar();
