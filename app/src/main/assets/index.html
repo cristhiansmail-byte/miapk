@@ -71,9 +71,10 @@ nav button.on{color:var(--turq-osc)}
 
 <script>
 const D = {
- actualizado: "10 nov 2026",
+ actualizado: "11 nov 2026",
  urlActualizar: "https://github.com/cristhiansmail-byte/miapk/releases/latest",
  novedades: [
+  ["0.3.3","OSI experimental en vivo (H5): documento ficticio con versión y huella SHA-256, aprobación y vigencia por Dirección desde la APK, alerta si el contenido se altera · órdenes al día (OE-MIAPK-002) · Medición sin la etiqueta «Pendiente» sobrante"],
   ["0.3.2","Indicador en vivo (H4): «PFV aceptados» se actualiza solo cada 10 segundos con valor anterior, estado, último evento y tiempo de llegada · errores separados por origen (pruebas negativas vs. incidentes)"],
   ["0.3.1","Motor de eventos del laboratorio (H3): contador de eventos corregido · eventos con error · estado de cada fuente · pestañas de referencia rotuladas «Referencia · sin conexión»"],
   ["0.3.0","Acceso seguro al servidor de laboratorio con contraseña y doble verificación (código de Google Authenticator) · cierre de sesión por inactividad y en todos los dispositivos"],
@@ -105,20 +106,23 @@ const D = {
   ["3","Experiencia de creación","Diseño conversacional definido · prototipo pendiente"],
   ["4","Producción y entrega","Sin entregas todavía"],
   ["5","Comercial y publicidad","Concepto «¿Qué es lo tuyo?» aprobado · piloto pendiente"],
-  ["6","Protección y confiabilidad","OSI diseñada (E02–E03) · custodia pendiente"],
-  ["7","Medición y mejora","16 indicadores definidos (E04) · todos pendientes"],
+  ["6","Protección y confiabilidad","OSI experimental en laboratorio (H5) · custodia formal pendiente"],
+  ["7","Medición y mejora","16 indicadores definidos (E04) · 1 conectado en laboratorio (PFV aceptados)"],
   ["8","Internacionalización","Vocación internacional aprobada · mercados sin habilitar"]
  ],
  proyectos: ["P01 Identidad visual","P02 Manual Maestro de Identidad","P03 Biblia de MÍA","P04 Experiencia web conversacional","P05 Generación y vista previa","P06 Oferta y contratación","P07 Entrega y publicación","P08 Producción publicitaria MÍA","P09 Panel interno mínimo","P10 Habilitación internacional"],
  ordenes: [
-  {id:"OE-MIAPK-001",t:"MIAPK · Fase 0 + APK",e:"En ejecución",c:"ok",
-   d:["E01 Inventario de fuentes — entregado, aceptado por Magid","E02 Arquitectura — entregado, aceptado con salvedades","E03 Entidades y eventos — entregado","E04 Diccionario de indicadores — entregado","APK v0.1 instalada en el Android de Dirección (10 nov)","E05 Matriz de autoridades y seguridad — entregado, aceptado","E06 Diseño visual navegable — esta versión 0.2.0","E07 a E10 — pendientes"],
+  {id:"OE-MIAPK-002",t:"MIAPK · Fase 1 · laboratorio con servidor",e:"En ejecución",c:"ok",
+   d:["H1 Infraestructura y RLS — PASA","H2 Acceso seguro con doble verificación — PASA con observaciones","H3 Motor de eventos — PASA con observaciones","H4 APK conectada · indicador en vivo — PASA con observaciones (cerrado para continuidad)","H5 OSI experimental — en curso","H6 Recuperabilidad · H7 Informe para Magid · H8 Cierre — pendientes"],
+   p:"USD 0", o:"CSW 003 v1.1 aprobado (10 nov)"},
+  {id:"OE-MIAPK-001",t:"MIAPK · Fase 0 + APK",e:"Cerrada",c:"ok",
+   d:["E01 Inventario de fuentes — entregado, aceptado por Magid","E02 Arquitectura — entregado, aceptado con salvedades","E03 Entidades y eventos — entregado","E04 Diccionario de indicadores — entregado","APK v0.1 instalada en el Android de Dirección (10 nov)","E05 Matriz de autoridades y seguridad — entregado, aceptado","E06 Diseño visual navegable — esta versión 0.2.0","E07 a E10 — entregados · Fase 0 cerrada documentalmente"],
    p:"USD 0", o:"CSW 002 v1.1 aprobado"},
   {id:"OE-MIA-001",t:"Licencia e integración de la voz de MÍA",e:"Hito logrado",c:"ok",
    d:["Fase 1 documental — entregada","Prueba Sandbox LITE — PASA: voz Montserrat con labios sincronizados, verificado por Dirección (10 nov)","Rostro de MÍA en el avatar y voz nueva por API — de pago; Dirección decidió sin gastos por ahora"],
    p:"USD 0", o:"CSW 001 aprobado"}
  ],
- csw: [["CSW 001","Licencia comercial e integración de voz MÍA","Aprobado"],["CSW 002 v1.1","MIAPK · Sistema de Dirección, Gestión y Medición","Aprobado (Fase 0)"]],
+ csw: [["CSW 001","Licencia comercial e integración de voz MÍA","Aprobado"],["CSW 002 v1.1","MIAPK · Sistema de Dirección, Gestión y Medición","Aprobado (Fase 0)"],["CSW 003 v1.1","MIAPK · Fase 1 · prototipo de laboratorio a USD 0","Aprobado"]],
  indicadores: [
   ["PFV aceptados","Indicador principal · entregas aceptadas por el cliente"],
   ["Conversaciones calificadas","Necesidad confirmada por MÍA"],
@@ -145,7 +149,9 @@ const D = {
   ["CSW 001","Aprobado","Texto en JetPost"],
   ["CSW 002 v1.1","Aprobado","Texto en JetPost"],
   ["OE-MIA-001","Emitida","Texto en JetPost"],
-  ["OE-MIAPK-001","Emitida","Texto en JetPost"],
+  ["OE-MIAPK-001","Cerrada","Texto en JetPost"],
+  ["CSW 003 v1.1","Aprobado","Texto en JetPost"],
+  ["OE-MIAPK-002","Emitida","Texto en JetPost"],
   ["Insignia OSI","Aprobado","Archivo de imagen pendiente de transferencia"]
  ]
 };
@@ -160,7 +166,7 @@ const V = {
   <div class="sec">Decisiones de Dirección</div>
   <div class="card">${D.decisiones.map(x=>row(x[0],x[1],pill(x[2]=="ok"?"Decidido":x[2]=="warn"?"Prioridad":"Pendiente",x[2]))).join("")}</div>
   <div class="sec">Órdenes activas</div>
-  <div class="card">${D.ordenes.map((o,i)=>row(o.id,o.t,pill(o.e,o.c),`onclick="verOrden('orden',${i})"`)).join("")}</div>
+  <div class="card">${D.ordenes.map((o,i)=>o.e=="Cerrada"?"":row(o.id,o.t,pill(o.e,o.c),`onclick="verOrden('orden',${i})"`)).join("")}</div>
   <div class="sec">Fuentes de datos</div>
   <div class="card">${D.fuentes.map(f=>row(f[0],f[1],pill(f[2]=="ok"?"Activa":"Pendiente",f[2]))).join("")}</div>${pie}`;},
  Programas(){ return `
@@ -175,8 +181,8 @@ const V = {
   <div class="card">${D.csw.map(c=>row(c[0],c[1],pill(c[2],"ok"))).join("")}</div>${pie}`;},
  Medición(){ setTimeout(()=>Vivo.iniciar(),0); return `
   <div id="vivo"></div>
-  <div class="card"><p><b>Ningún indicador tiene datos todavía.</b> Sus fuentes aún no existen; por eso todos aparecen como <b>Pendiente</b> y no como cero.</p></div>
-  <div class="card">${D.indicadores.map(i=>row(i[0],i[1],pill("Pendiente","pend"))).join("")}</div>
+  <div class="card"><p><b>PFV aceptados</b> ya tiene fuente de laboratorio: su valor y su estado están en la tarjeta <b>En vivo</b>. Los otros 15 indicadores aún no tienen fuente; por eso aparecen como <b>Pendiente</b> y no como cero.</p></div>
+  <div class="card">${D.indicadores.map((i,k)=>row(i[0],i[1],k==0?pill("En vivo ↑","ok"):pill("Pendiente","pend"))).join("")}</div>
   <div class="sec">Qué significa cada estado</div>
   <div class="card legend">
    ${row("Confirmado","Hay datos y la fuente está al día; un cero aquí es un cero real",pill("Confirmado","ok"))}
@@ -196,7 +202,8 @@ const V = {
   </div>
   <div class="card"><h2>Bienvenida aprobada</h2><p class="quote">Hola, soy Mía, la asistente de Mi Sitio Web. Estoy aquí para ayudarte a crear un sitio que responda a lo que necesitas. Podemos conversar y construirlo juntos, paso a paso. Para comenzar, cuéntame: ¿qué es lo tuyo?</p></div>
   <div class="card"><p class="mono">ID de voz: 1777080b7f574979875dc144b9fbf0de</p></div>${pie}`;},
- OSI(){ return `
+ OSI(){ setTimeout(()=>OsiVivo.iniciar(),0); return `
+  <div id="osivivo"></div>
   <div class="card"><h2>Oficina de Salvaguarda Institucional</h2><p>Custodia de los documentos oficiales de Mi Sitio Web. <b>Hoy ningún documento está bajo custodia formal</b>: esta lista registra qué existe y dónde está.</p></div>
   <div class="card">${D.osi.map(d=>row(d[0],d[2],pill(d[1],"ok"))).join("")}</div>
   <div class="card"><p>Ciclo: Borrador → En revisión → Aprobado → Vigente → Sustituido / Archivado. Solo Dirección aprueba.</p></div>
@@ -212,7 +219,7 @@ const iconos={
  MÍA:'<path d="M4 5h16v11H10l-5 4v-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
  OSI:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
 };
-function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.3.2"; }catch(e){ return "0.3.2"; } }
+function ver(){ try{ return (window.MIAPK && MIAPK.version()) || "0.3.3"; }catch(e){ return "0.3.3"; } }
 function verActualizar(){ detalle=true;
   document.getElementById("titulo").textContent="Actualizar";
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));
@@ -256,6 +263,8 @@ const Auth = {
   async enrolar(){ return this.api("/auth/v1/factors",{method:"POST",body:{factor_type:"totp",friendly_name:"MIAPK "+new Date().toISOString().slice(0,10)}}); },
   async verificar(factorId, codigo){ const c=await this.api("/auth/v1/factors/"+factorId+"/challenge",{method:"POST",body:{}}); this.fijar(await this.api("/auth/v1/factors/"+factorId+"/verify",{method:"POST",body:{challenge_id:c.id,code:codigo}})); },
   async leer(ruta){ const r=await fetch(SB.url+"/rest/v1/"+ruta,{headers:{apikey:SB.key,Authorization:"Bearer "+this.s.access_token,"Accept-Profile":"miapk"}}); if(!r.ok) throw new Error("rechazado ("+r.status+")"); return r.json(); },
+  async rpc(fn,body){ await this.vigente(); const r=await fetch(SB.url+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SB.key,Authorization:"Bearer "+this.s.access_token,"Content-Profile":"miapk","Content-Type":"application/json"},body:JSON.stringify(body)});
+    let j=null; try{ j=await r.json(); }catch(e){} if(!r.ok) throw new Error((j&&j.message)||("rechazado ("+r.status+")")); return j; },
   async salirTodos(){ try{ await this.api("/auth/v1/logout?scope=global",{method:"POST"}); }catch(e){} this.borrar(); },
   async contar(tabla,col){ const r=await fetch(SB.url+"/rest/v1/"+tabla+"?select="+(col||"id"),{headers:{apikey:SB.key,Authorization:"Bearer "+this.s.access_token,"Accept-Profile":"miapk",Prefer:"count=exact",Range:"0-0"}});
     if(!r.ok){ return "rechazado ("+r.status+")"; } const cr=r.headers.get("content-range")||"*/0"; return cr.split("/")[1]; }
@@ -280,6 +289,33 @@ const Vivo = {
       ${row("Último evento","Recibido "+llegada,"")}
       ${row("Último error de este indicador",i.ultimo_error_at?this.hora(i.ultimo_error_at):"Ninguno","")}</div>`;
   }
+};
+const OsiVivo = {
+  timer:null, aviso:null,
+  pillEstado(e){ const t={borrador:"Borrador",en_revision:"En revisión",aprobado:"Aprobado",vigente:"Vigente",sustituido:"Sustituido",archivado:"Archivado"}[e]||e; return pill(t, e=="vigente"||e=="aprobado"?"ok":(e=="en_revision"?"warn":"pend")); },
+  iniciar(){ clearInterval(this.timer); this.pintar(); this.timer=setInterval(()=>{ if(!document.getElementById("osivivo")){ clearInterval(this.timer); return; } const a=document.activeElement; if(a && a.id && a.id.indexOf("ositx")==0) return; this.pintar(); },10000); },
+  async pintar(){ const el=document.getElementById("osivivo"); if(!el) return;
+    Auth.cargar(); await Auth.vigente();
+    if(Auth.nivel()!="aal2"){ el.innerHTML=`<div class="card"><h2>OSI experimental · en vivo</h2><p>Para ver y aprobar documentos de prueba entra en <a onclick="verAcceso()">Acceso seguro</a> con tu código.</p></div>`; return; }
+    let ds; try{ ds=await Auth.leer("v_osi_integridad?select=*&order=codigo,version"); }catch(x){ el.innerHTML=`<div class="card"><h2>OSI experimental · en vivo</h2>${row("Documentos","No se pudo consultar",pill(x.message,"err"))}</div>`; return; }
+    const h=t=>t?new Date(t).toLocaleTimeString("es-CO",{hour12:false}):"—";
+    let html=`<div class="card"><h2>OSI experimental · en vivo</h2><p class="note">Solo documentos ficticios · sin custodia legal · se verifica cada 10 s · última verificación ${h(Date.now())}</p>`;
+    ds.forEach(d=>{ const alt=d.integridad!="Íntegro";
+      html+=row(d.codigo+" · v"+d.version, d.titulo, this.pillEstado(d.estado));
+      html+=row("Huella SHA-256", d.sha256_actual.slice(0,16)+"…"+(d.sha256_aprobado?" · aprobada "+d.sha256_aprobado.slice(0,8)+"…":""), pill(alt?"ALERTA: ALTERADO":"Íntegro", alt?"err":"ok"));
+      if(d.estado=="en_revision") html+=`<input class="f" id="ositx_${d.version_id}" value="Apruebo ${d.codigo} versión ${d.version}."><button class="btn" onclick="OsiVivo.aprobar('${d.version_id}')">Aprobar esta versión</button>`;
+      if(d.estado=="aprobado") html+=`<button class="btn" onclick="OsiVivo.vigente('${d.version_id}')">Poner vigente</button>`;
+    });
+    if(!ds.length) html+=`<p>No hay documentos de prueba todavía.</p>`;
+    if(this.aviso) html+=`<p class="msg ${this.aviso[1]}">${this.aviso[0]}</p>`;
+    el.innerHTML=html+`</div>`;
+  },
+  async aprobar(id){ const t=(document.getElementById("ositx_"+id)||{}).value||""; Auth.tocar();
+    try{ const r=await Auth.rpc("osi_aprobar",{p_version_id:id,p_texto_literal:t}); this.aviso=["Aprobado. Huella registrada: "+r.sha256.slice(0,16)+"…","ok"]; }catch(x){ this.aviso=[x.message,"err"]; }
+    document.activeElement && document.activeElement.blur && document.activeElement.blur(); this.pintar(); },
+  async vigente(id){ Auth.tocar();
+    try{ const r=await Auth.rpc("osi_poner_vigente",{p_version_id:id}); this.aviso=["Vigente. Huella verificada: "+r.sha256.slice(0,16)+"…","ok"]; }catch(x){ this.aviso=[x.message,"err"]; }
+    this.pintar(); }
 };
 function traducir(m){ const t={"Invalid login credentials":"Correo o contraseña incorrectos.","Email not confirmed":"Falta confirmar tu correo: abre el mensaje de Supabase y toca el enlace.","User already registered":"Ese correo ya tiene acceso. Usa Entrar.","Invalid TOTP code entered":"Código incorrecto o vencido. Escribe el código actual de Google Authenticator.","Signups not allowed for this instance":"El registro está cerrado. Usa Entrar."}; for(const k in t){ if(String(m).includes(k)) return t[k]; } return String(m); }
 let pendienteQR=null;

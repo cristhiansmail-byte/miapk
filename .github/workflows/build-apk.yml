@@ -23,6 +23,9 @@ jobs:
         with:
           gradle-version: "8.14.3"
 
+      - name: Prueba de regresión (defectos abiertos H4)
+        run: node pruebas/regresion_apk.mjs
+
       - name: Compilar APK firmada
         run: gradle :app:assembleRelease --no-daemon
 
