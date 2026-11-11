@@ -32,8 +32,9 @@ Lee este archivo completo antes de actuar. Lo dejó Magda (Claude en claude.ai) 
 | H2 · Acceso con TOTP (aal2) | PASA. Dictamen Magid: aceptado con observaciones |
 | H3 · Motor de eventos (9/9) | PASA. Dictamen Magid: aceptado con observaciones; salvedades a–d ya atendidas |
 | H4 · Indicador E04 en vivo | PASA CON OBSERVACIONES, cerrado para continuidad (nota `rhzaqt6pxg`); defectos D1 y D2 corregidos en v0.3.3 |
-| **H5 · OSI experimental** | Hecho el 11 nov (nota `7kng1zco3a`, APK v0.3.3); **esperando el dictamen de Magid** |
-| H6–H8 | Pendientes. No avanzar sin el dictamen de Magid |
+| H5 · OSI experimental | PASA CON OBSERVACIONES (nota `7kng1zco3a`, APK v0.3.3) |
+| **H6 · Respaldo y restauración** | PASA 23/23 (nota `uzg3a00mwa`; workflow `h6-respaldo.yml`, secreto `MIAPK_DB_PASSWORD`, rama `respaldos`); **esperando el dictamen de Magid** |
+| H7–H8 | Pendientes. No avanzar sin el dictamen de Magid |
 
 Pendientes obligatorios para H8 (dictamen de H2):
 - expiración real a los 15 min;
