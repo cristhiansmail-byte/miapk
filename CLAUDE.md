@@ -1,6 +1,6 @@
 # MIAPK · Contexto para Claude Code
 
-Lee este archivo completo antes de actuar. Lo dejó Magda (Claude en claude.ai) el 11 nov 2026 para continuar el trabajo aquí.
+Lee este archivo completo antes de actuar. Lo dejó Magda (Claude en claude.ai), actualizado el 13 nov 2026, para continuar el trabajo aquí.
 
 ## Quiénes
 - **Dirección:** Nóah Bentzadik (cuenta Jetpost "Darshan Bhakti Vinód"). Llámalo **Nóah**. Responde siempre en **español**.
@@ -10,6 +10,7 @@ Lee este archivo completo antes de actuar. Lo dejó Magda (Claude en claude.ai) 
 ## Cómo trabajar con Nóah (obligatorio)
 - Haz tú todo lo que puedas; pídele solo lo que de verdad no puedes hacer (contraseñas, códigos, inicios de sesión suyos).
 - Después de cada informe, termina con **instrucciones concretas** para él: lista numerada, **una sola acción por punto**.
+- Si hace una pregunta, primero respóndela mostrando qué le beneficia más; una pregunta no es una orden de actuar.
 - No le sugieras cosas que no pidió. No le pidas permiso para reemplazar lo necesario.
 - Cuando escriba solo **«JetPost»**: revisa lo nuevo en Jetpost (workspace `darshan-bhakti-vinod`) e infórmale.
 
@@ -44,7 +45,12 @@ Lee este archivo completo antes de actuar. Lo dejó Magda (Claude en claude.ai) 
 - Hitos F2-H1 → F2-H8 en secuencia. Ninguno avanza sin el dictamen de Magid. Si F2-H6 queda BLOQUEADO, no se inicia F2-H7.
 - Respaldo: opción A, manual y cifrado (age), al cerrar cada hito y antes de cada cambio de esquema; se guardan las 4 últimas copias.
 - **F2-H1 hecho** (11 nov, 12:45): todo PASA en el Android de Dirección; APK v0.4.0 con sesión cifrada en el Keystore; nota `l4xhdm8j0b`, `pruebas/fase2/F2-H1_evidencia.md`. Dictamen: PASA CON OBSERVACIONES.
-- **F2-H2 hecho** (11 nov, 13:06): revocación efectiva con `sesion_vigente()` en `es_direccion_mfa()` (migración 0007); 3 modos PASA a los 0 s en Android; APK v0.4.1; nota `3zlgnxczcy`. Vigencia del JWT ajustada a 600 s en el panel (13:24); el navegador integrado ya tiene la sesión correcta de Supabase (vía GitHub). **Esperando el dictamen de Magid** antes de F2-H3.
+- **F2-H2 hecho** (11 nov, 13:06): revocación efectiva con `sesion_vigente()` en `es_direccion_mfa()` (migración 0007); 3 modos PASA a los 0 s en Android; APK v0.4.1; nota `3zlgnxczcy`. Vigencia del JWT ajustada a 600 s en el panel (13:24); el navegador integrado ya tiene la sesión correcta de Supabase (vía GitHub). Dictamen de Magid recibido; F2-H3 autorizado.
+- **F2-H3 en curso** (autenticador TOTP de respaldo). Nóah no tiene segundo dispositivo: eligió **KeePassXC en su laptop Windows**. APK **v0.4.2** (versionCode 11, sha256 c1d3e597…3e17) con la tarjeta «Autenticador de respaldo» en Acceso seguro (agregar / confirmar / quitar; factor con nombre «Respaldo …») y el enlace de login «Perdí mi autenticador principal → usar el de respaldo».
+  - Hecho por Nóah (11 nov, ~13:56): base KeePassXC «MIAPK respaldo», apunte «MIAPK respaldo» (en español el menú se llama «Apuntes»; Ctrl+N), escribió él la clave en TOTP → Configurar TOTP.
+  - **Falta:** que confirme el registro (Mostrar TOTP → código en el teléfono → «Confirmar respaldo») y reporte el mensaje; luego las pruebas: entrar con el principal (1 código), entrar con «Perdí mi autenticador principal», quitar el respaldo y comprobar que deja de servir, volver a registrarlo; evidencia `pruebas/fase2/F2-H3_evidencia.md` sin secretos; nota Jetpost y pedir dictamen a Magid. No iniciar F2-H4 sin dictamen.
+  - Nunca pedir ni ver la clave ni los códigos. La laptop tiene una ventana oscura siempre visible que tapa el centro de la pantalla en el uso de computadora.
+- Siguientes: F2-H4 segunda cuenta de laboratorio (la crea Nóah con otro correo suyo), F2-H5 respaldos cifrados con age, F2-H6 auditoría (BLOQUEADO si no es viable), F2-H7 chat guionado de MÍA Web, F2-H8 regresión + prueba real de inactividad de 15 min + informe final.
 - Las migraciones se aplican ahora con `aplicar-migracion.yml` (escribir en `supabase/aplicar.txt`: línea 1 = migración, línea 2 = script de verificación).
 
 Requisito de Dirección para el acceso: el uso diario pide solo contraseña + 1 código TOTP; el segundo autenticador es solo respaldo; sin correo ni atajos.
